@@ -26,6 +26,7 @@ let circlePosition = {
 function drawCircle() {
     c.reset()
     drawAxis()
+    recoupTreats()
     c.beginPath()
     c.translate(circlePosition.x, circlePosition.y)
     c.arc(500, 375, 50, 0, 2 * Math.PI)
@@ -38,11 +39,11 @@ function drawCircle() {
 let treats = []
 
 function drawTreats() {
-    let treatPosition = {
-        x: 0,
-        y: 0
-    }
     for (let i = 0; i < 10; i++) {
+        let treatPosition = {
+            x: 0,
+            y: 0
+        }
         treatPosition.x = getRandomInt(986)
         treatPosition.y = getRandomInt(736)
         treats.push(treatPosition)
@@ -51,9 +52,21 @@ function drawTreats() {
     }
 }
 
+
+function recoupTreats() {
+    for (let i = 0; i < 10; i++) {
+        c.fillStyle = 'orange'
+        c.fillRect(treats[i].x, treats[i].y, 15, 15)
+    }
+}
+
 drawAxis()
-drawCircle()
 drawTreats()
+drawCircle()
+
+
+console.log(treats)
+console.log(treats[0].x)
 
 window.addEventListener('keydown', function(event) {
     if (event.code == 'KeyD') {
