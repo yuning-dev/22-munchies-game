@@ -17,20 +17,31 @@ function drawAxis() {
     c.stroke()
 }
 
+let circle = {
+    position: {
+        x: 0,
+        y: 0
+    },
+    arc: function() {
+        return c.arc(500, 375, 50, 0, 2 * Math.PI)
+    },
+    fillStyle: function () {
+        return c.fillStyle = 'lightblue'
+    }
+}
 
-let circlePosition = {
-    x: 0,
-    y: 0
+let circleTranslate = function () {
+    return c.translate(circle.position.x, circle.position.y)
 }
 
 function drawCircle() {
     c.reset()
     drawAxis()
-    recoupTreats()
+    drawTreats()
     c.beginPath()
-    c.translate(circlePosition.x, circlePosition.y)
-    c.arc(500, 375, 50, 0, 2 * Math.PI)
-    c.fillStyle = 'lightblue'
+    circleTranslate()
+    circle.arc()
+    circle.fillStyle()
     c.fill()
     c.resetTransform()
 }
@@ -38,48 +49,47 @@ function drawCircle() {
 
 let treats = []
 
-function drawTreats() {
+function generateTreats() {
     for (let i = 0; i < 10; i++) {
-        let treatPosition = {
-            x: 0,
-            y: 0
+        let treat = {
+            position: {
+                x: 0,
+                y: 0
+            },
+            fillStyle: function () {
+                return c.fillStyle = 'orange'
+            }
         }
-        treatPosition.x = getRandomInt(986)
-        treatPosition.y = getRandomInt(736)
-        treats.push(treatPosition)
-        c.fillStyle = 'orange'
-        c.fillRect(treatPosition.x, treatPosition.y, 15, 15)
+        treat.position.x = getRandomInt(986)
+        treat.position.y = getRandomInt(736)
+        treats.push(treat)
     }
 }
 
-
-function recoupTreats() {
-    for (let i = 0; i < 10; i++) {
-        c.fillStyle = 'orange'
-        c.fillRect(treats[i].x, treats[i].y, 15, 15)
+function drawTreats() {
+    for (let treat of treats) {
+        treat.fillStyle()
+        c.fillRect(treat.position.x, treat.position.y, 15, 15)
     }
 }
 
 drawAxis()
-drawTreats()
+generateTreats()
 drawCircle()
-
-
-console.log(treats)
-console.log(treats[0].x)
+drawTreats()
 
 window.addEventListener('keydown', function(event) {
     if (event.code == 'KeyD') {
-        circlePosition.x += 50
+        circle.position.x += 50
         drawCircle()
     } else if (event.code == 'KeyA') {
-        circlePosition.x -= 50
+        circle.position.x -= 50
         drawCircle()
     } else if (event.code === 'KeyS') {
-        circlePosition.y += 50
+        circle.position.y += 50
         drawCircle()
     } else if (event.code === 'KeyW') {
-        circlePosition.y -= 50
+        circle.position.y -= 50
         drawCircle()
     }
 
