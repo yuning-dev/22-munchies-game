@@ -41,6 +41,8 @@ function drawCircle() {
     c.beginPath()
     circleTranslate()
     circle.arc()
+    c.closePath()
+    checkOverlap()
     circle.fillStyle()
     c.fill()
     c.resetTransform()
@@ -51,17 +53,27 @@ let treats = []
 
 function generateTreats() {
     for (let i = 0; i < 10; i++) {
+        let x = getRandomInt(986)
+        let y = getRandomInt(736)
+        let width = 15
+        let height = 15
         let treat = {
             position: {
-                x: 0,
-                y: 0
+                x: x,
+                y: y
             },
             fillStyle: function () {
                 return c.fillStyle = 'orange'
+            },
+            size: {
+                width: 15,
+                height: 15
+            },
+            center: {
+                x: Math.ceil(x + width / 2),
+                y: Math.ceil(y + height / 2)
             }
         }
-        treat.position.x = getRandomInt(986)
-        treat.position.y = getRandomInt(736)
         treats.push(treat)
     }
 }
@@ -69,30 +81,33 @@ function generateTreats() {
 function drawTreats() {
     for (let treat of treats) {
         treat.fillStyle()
-        c.fillRect(treat.position.x, treat.position.y, 15, 15)
+        c.fillRect(treat.position.x, treat.position.y, treat.size.width, treat.size.height)
+    }
+}
+
+function checkOverlap() {
+    for (let i = 0; i < treats.length; i++) {
+        if (c.isPointInPath(treats[i].center.x, treats[i].center.y)) {
+            treats.splice(i, 1)
+        }
     }
 }
 
 drawAxis()
 generateTreats()
 drawCircle()
-drawTreats()
 
 window.addEventListener('keydown', function(event) {
     if (event.code == 'KeyD') {
         circle.position.x += 50
-        drawCircle()
     } else if (event.code == 'KeyA') {
         circle.position.x -= 50
-        drawCircle()
     } else if (event.code === 'KeyS') {
         circle.position.y += 50
-        drawCircle()
     } else if (event.code === 'KeyW') {
         circle.position.y -= 50
-        drawCircle()
     }
-
+    drawCircle()
 })
 
 
