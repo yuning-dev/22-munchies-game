@@ -1,6 +1,14 @@
 const canvas = document.getElementById('mainCanvas')
 let c = canvas.getContext('2d')
 
+function getRandomInt(max) {
+    return Math.floor(Math.random() * max)
+}
+
+function getRadians(degrees) {
+    return degrees * Math.PI / 180
+}
+
 // class Entity {
 //     constructor() {
 
@@ -56,6 +64,7 @@ class Treat {
 
 }
 
+
 let treats = []
 
 function generateTreats() {
@@ -72,10 +81,6 @@ preDrawingCircle(circle)
 circle.drawCircle()
 postDrawingCircle()
 
-function getRandomInt(max) {
-    return Math.floor(Math.random() * max)
-}
-
 function preDrawingCircle() {
     c.reset()
     drawAxis()
@@ -87,6 +92,11 @@ function preDrawingCircle() {
 
 function postDrawingCircle() {
     circle.checkOverlap(treats)
+    // console.log(treats)
+    // for (let treat of treats) {
+    //     treat.drawTreat()
+    // }
+    // console.log(treats)
     c.resetTransform()
 }
 
@@ -132,3 +142,46 @@ window.addEventListener('keydown', function(event) {
 })
 
 
+
+// let x = 500
+// let y = 375
+// let r = 15
+// let arm = r + 7.5
+
+// function drawMine(x, y, r, arm) {
+//     c.beginPath()
+//     c.arc(x, y, r, 0, 2 * Math.PI)
+//     c.fillStyle = '#800020'
+//     c.fill()
+    
+//     c.strokeStyle = '#800020'
+//     c.lineWidth = 2
+    
+//     c.moveTo(x - arm, y)
+//     c.lineTo(x + arm, y)
+//     c.stroke()
+    
+//     c.moveTo(x, y - arm)
+//     c.lineTo(x, y + arm)
+//     c.stroke()
+    
+//     let obliqueX = Math.cos(getRadians(45)) * arm
+//     let obliqueY = Math.sin(getRadians(45)) * arm
+    
+//     console.log(obliqueX)
+//     console.log(obliqueY)
+    
+//     c.moveTo(x + obliqueX, y - obliqueY)
+//     c.lineTo(x - obliqueX, y + obliqueY)
+//     c.stroke()
+    
+//     c.moveTo(x - obliqueX, y - obliqueY)
+//     c.lineTo(x + obliqueX, y + obliqueY)
+//     c.stroke()
+//     c.closePath()    
+// }
+
+// drawMine(100, 375, 10, 15)
+// drawMine(400, 300, 10, 15)
+// drawMine(200, 500, 10, 15)
+// drawMine(900, 700, 10, 15)
