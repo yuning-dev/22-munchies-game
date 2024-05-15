@@ -14,14 +14,6 @@ class Circle {
         // console.log(JSON.stringify(ob))
     }
 
-    // checkOverlap() {
-    //     for (let i = 0; i < treats.length; i++) {
-    //         if (c.isPointInPath(treats[i].center.x, treats[i].center.y)) {
-    //             treats.splice(i, 1)
-    //         }
-    //     }
-    // }
-
     drawCircle() {
         c.beginPath()
         c.arc(0, 0, this.radius, 0, 2 * Math.PI)
@@ -30,16 +22,49 @@ class Circle {
         c.fill()
     }
 
-    enlargeCircle(delta) {
+    checkOverlap(shapes) {
+        for (let i = 0; i < shapes.length; i++) {
+            if (c.isPointInPath(shapes[i].center.x, shapes[i].center.y)) {
+                shapes.splice(i, 1)
+                this.changeCircleSize(7.5)
+            }
+        }
+    }
+
+    changeCircleSize(delta) {
         this.radius += delta
     }
 }
 
 class Treat {
-    
+    constructor(position) {
+        this.position = { ...position }
+        this.size = {
+            width: 15,
+            height: 15
+        }
+        this.center =  {
+            x: Math.ceil(this.position.x + this.size.width / 2),
+            y: Math.ceil(this.position.y + this.size.height / 2)
+        }
+    }
+
+    drawTreat() {
+        c.fillStyle = 'orange'
+        c.fillRect(this.position.x, this.position.y, this.size.width, this.size.height)
+    }
+
 }
 
 let treats = []
+
+function generateTreats() {
+    for (let i = 0; i < 10; i++) {
+        let treat = new Treat({x: getRandomInt(986), y: getRandomInt(736)})
+        treats.push(treat)
+    }
+}
+
 generateTreats()
 
 let circle = new Circle({x: 500, y: 375}, 50)
@@ -54,12 +79,14 @@ function getRandomInt(max) {
 function preDrawingCircle() {
     c.reset()
     drawAxis()
-    drawTreats()
+    for (let treat of treats) {
+        treat.drawTreat()
+    }
     c.translate(circle.position.x, circle.position.y)
 }
 
 function postDrawingCircle() {
-    checkOverlap()
+    circle.checkOverlap(treats)
     c.resetTransform()
 }
 
@@ -75,19 +102,6 @@ function drawAxis() {
     c.stroke()
 }
 
-// let circle = {
-//     position: {
-//         x: 500,
-//         y: 375
-//     },
-//     arc() {
-//         return c.arc(0, 0, 50, 0, 2 * Math.PI)
-//     },
-//     fillStyle() {
-//         return c.fillStyle = 'lightblue'
-//     },
-// }
-
 // function drawCircle() {
 //     c.reset()
 //     drawAxis()
@@ -101,60 +115,6 @@ function drawAxis() {
 //     checkOverlap()
 //     c.resetTransform()
 // }
-
-// function drawCircle() {
-//     preDrawingCircle()
-//     c.beginPath()
-//     c.arc(0, 0, 50, 0, 2 * Math.PI)
-//     c.closePath()
-//     c.fillStyle = 'lightblue'
-//     c.fill()
-//     postDrawingCircle()
-// }
-
-
-function generateTreats() {
-    for (let i = 0; i < 10; i++) {
-        let x = getRandomInt(986)
-        let y = getRandomInt(736)
-        let width = 15
-        let height = 15
-        let treat = {
-            position: {
-                x: x,
-                y: y
-            },
-            fillStyle: function () {
-                return c.fillStyle = 'orange'
-            },
-            size: {
-                width: 15,
-                height: 15
-            },
-            center: {
-                x: Math.ceil(x + width / 2),
-                y: Math.ceil(y + height / 2)
-            }
-        }
-        treats.push(treat)
-    }
-}
-
-function drawTreats() {
-    for (let treat of treats) {
-        treat.fillStyle()
-        c.fillRect(treat.position.x, treat.position.y, treat.size.width, treat.size.height)
-    }
-}
-
-function checkOverlap() {
-    for (let i = 0; i < treats.length; i++) {
-        if (c.isPointInPath(treats[i].center.x, treats[i].center.y)) {
-            treats.splice(i, 1)
-            circle.enlargeCircle(7.5)
-        }
-    }
-}
 
 window.addEventListener('keydown', function(event) {
     if (event.code == 'KeyD' || event.code == 'ArrowRight') {
