@@ -1,8 +1,57 @@
 const canvas = document.getElementById('mainCanvas')
 let c = canvas.getContext('2d')
 
+// class Entity {
+//     constructor() {
+
+//     }
+// }
+
+class Circle {
+    constructor(position) {
+        this.position = { ...position }
+        // console.log(JSON.stringify(ob))
+    }
+
+    // checkOverlap() {
+    //     for (let i = 0; i < treats.length; i++) {
+    //         if (c.isPointInPath(treats[i].center.x, treats[i].center.y)) {
+    //             treats.splice(i, 1)
+    //         }
+    //     }
+    // }
+
+    drawCircle() {
+        c.beginPath()
+        c.arc(0, 0, 50, 0, 2 * Math.PI)
+        c.closePath()
+        c.fillStyle = 'lightblue'
+        c.fill()
+    }
+}
+
+let treats = []
+generateTreats()
+
+let circle = new Circle({x: 500, y: 375})
+preDrawingCircle(circle)
+circle.drawCircle()
+postDrawingCircle()
+
 function getRandomInt(max) {
     return Math.floor(Math.random() * max)
+}
+
+function preDrawingCircle() {
+    c.reset()
+    drawAxis()
+    drawTreats()
+    c.translate(circle.position.x, circle.position.y)
+}
+
+function postDrawingCircle() {
+    checkOverlap()
+    c.resetTransform()
 }
 
 function drawAxis() {
@@ -13,43 +62,47 @@ function drawAxis() {
 
     c.beginPath()
     c.moveTo(0, 375)
-    c.lineTo(5000, 375)
+    c.lineTo(1000, 375)
     c.stroke()
 }
 
-let circle = {
-    position: {
-        x: 0,
-        y: 0
-    },
-    arc: function() {
-        return c.arc(500, 375, 50, 0, 2 * Math.PI)
-    },
-    fillStyle: function () {
-        return c.fillStyle = 'lightblue'
-    }
-}
+// let circle = {
+//     position: {
+//         x: 500,
+//         y: 375
+//     },
+//     arc() {
+//         return c.arc(0, 0, 50, 0, 2 * Math.PI)
+//     },
+//     fillStyle() {
+//         return c.fillStyle = 'lightblue'
+//     },
+// }
 
-let circleTranslate = function () {
-    return c.translate(circle.position.x, circle.position.y)
-}
+// function drawCircle() {
+//     c.reset()
+//     drawAxis()
+//     drawTreats()
+//     c.translate(circle.position.x, circle.position.y)
+//     c.beginPath()
+//     circle.arc()
+//     c.closePath()
+//     circle.fillStyle()
+//     c.fill()
+//     checkOverlap()
+//     c.resetTransform()
+// }
 
-function drawCircle() {
-    c.reset()
-    drawAxis()
-    drawTreats()
-    c.beginPath()
-    circleTranslate()
-    circle.arc()
-    c.closePath()
-    checkOverlap()
-    circle.fillStyle()
-    c.fill()
-    c.resetTransform()
-}
+// function drawCircle() {
+//     preDrawingCircle()
+//     c.beginPath()
+//     c.arc(0, 0, 50, 0, 2 * Math.PI)
+//     c.closePath()
+//     c.fillStyle = 'lightblue'
+//     c.fill()
+//     postDrawingCircle()
+// }
 
-
-let treats = []
 
 function generateTreats() {
     for (let i = 0; i < 10; i++) {
@@ -93,21 +146,19 @@ function checkOverlap() {
     }
 }
 
-drawAxis()
-generateTreats()
-drawCircle()
-
 window.addEventListener('keydown', function(event) {
-    if (event.code == 'KeyD') {
+    if (event.code == 'KeyD' || event.code == 'ArrowRight') {
         circle.position.x += 50
-    } else if (event.code == 'KeyA') {
+    } else if (event.code == 'KeyA' || event.code == 'ArrowLeft') {
         circle.position.x -= 50
-    } else if (event.code === 'KeyS') {
+    } else if (event.code === 'KeyS' || event.code == 'ArrowDown') {
         circle.position.y += 50
-    } else if (event.code === 'KeyW') {
+    } else if (event.code === 'KeyW' || event.code == 'ArrowUp') {
         circle.position.y -= 50
     }
-    drawCircle()
+    preDrawingCircle(circle)
+    circle.drawCircle()
+    postDrawingCircle()
 })
 
 
