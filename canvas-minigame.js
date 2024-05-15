@@ -8,8 +8,9 @@ let c = canvas.getContext('2d')
 // }
 
 class Circle {
-    constructor(position) {
+    constructor(position, radius) {
         this.position = { ...position }
+        this.radius = radius
         // console.log(JSON.stringify(ob))
     }
 
@@ -23,17 +24,25 @@ class Circle {
 
     drawCircle() {
         c.beginPath()
-        c.arc(0, 0, 50, 0, 2 * Math.PI)
+        c.arc(0, 0, this.radius, 0, 2 * Math.PI)
         c.closePath()
         c.fillStyle = 'lightblue'
         c.fill()
     }
+
+    enlargeCircle(delta) {
+        this.radius += delta
+    }
+}
+
+class Treat {
+    
 }
 
 let treats = []
 generateTreats()
 
-let circle = new Circle({x: 500, y: 375})
+let circle = new Circle({x: 500, y: 375}, 50)
 preDrawingCircle(circle)
 circle.drawCircle()
 postDrawingCircle()
@@ -142,6 +151,7 @@ function checkOverlap() {
     for (let i = 0; i < treats.length; i++) {
         if (c.isPointInPath(treats[i].center.x, treats[i].center.y)) {
             treats.splice(i, 1)
+            circle.enlargeCircle(7.5)
         }
     }
 }
