@@ -16,8 +16,8 @@ function getRadians(degrees) {
 // }
 
 class Circle {
-    constructor(position, radius) {
-        this.position = { ...position }
+    constructor(center, radius) {
+        this.center = { ...center }
         this.radius = radius
         // console.log(JSON.stringify(ob))
     }
@@ -30,15 +30,25 @@ class Circle {
         c.fill()
     }
 
-    checkOverlap(shapes) {
+    checkOverlapWithObjCenter(shapes) {
         for (let i = 0; i < shapes.length; i++) {
-            if (c.isPointInPath(shapes[i].center.x, shapes[i].center.y)) {
-                if (shapes[i].radius === undefined) {
-                    this.changeCircleSize(7.5)
-                } else {
-                    this.changeCircleSize(-15)
-                }
+            let legA = shapes[i].center.x - this.center.x
+            let legB = shapes[i].center.y - this.center.y
+            if (legA ** 2 + legB ** 2 <= this.radius ** 2) {
+                this.changeCircleSize(7.5)
                 shapes.splice(i, 1)
+            }
+        }
+    }
+
+    checkOverlapWithCircle(circles) {
+        for (let i = 0; i < circles.length; i++) {
+            let legA = circles[i].center.x - this.center.x
+            let legB = circles[i].center.y - this.center.y
+            if (legA ** 2 + legB ** 2 <= (this.radius + circles[i].arm) ** 2) {
+                console.log('stepping on a mine!!')
+                this.changeCircleSize(-20)
+                circles.splice(i, 1)
             }
         }
     }
@@ -67,11 +77,6 @@ class Treat {
     }
 
 }
-
-// let x = 500
-// let y = 375
-// let r = 15
-// let arm = r + 7.5
 
 class Mine {
     constructor(center, radius, arm) {
@@ -115,19 +120,20 @@ let mines = []
 
 function generateMines() {
     for (let i = 0; i < 4; i++) {
-        let mine = new Mine({x: getRandomInt(986), y: getRandomInt(736)}, 10, 15)
+        let mine = new Mine({x: getRandomInt(1000 - 15), y: getRandomInt(750 - 15)}, 10, 15)
         mines.push(mine)
     }
 }
 
 generateMines()
+console.log(mines)
 
 
 let treats = []
 
 function generateTreats() {
     for (let i = 0; i < 10; i++) {
-        let treat = new Treat({x: getRandomInt(986), y: getRandomInt(736)})
+        let treat = new Treat({x: getRandomInt(1000 - 15), y: getRandomInt(750 - 15)})
         treats.push(treat)
     }
 }
@@ -148,13 +154,14 @@ function preDrawingCircle() {
     for (let mine of mines) {
         mine.drawMine()
     }
-    c.translate(circle.position.x, circle.position.y)
+    c.translate(circle.center.x, circle.center.y)
 }
 
 function postDrawingCircle() {
-    circle.checkOverlap(treats)
+    // circle.checkOverlapWithObjCenter(treats)
+    circle.checkOverlapWithCircle(mines)
 
-    circle.checkOverlap(mines)
+    // circle.checkOverlap(mines)
     // c.resetTransform()
     // console.log(treats)
     // for (let treat of treats) {
@@ -185,7 +192,7 @@ function redrawCanvas() {
 //     c.reset()
 //     drawAxis()
 //     drawTreats()
-//     c.translate(circle.position.x, circle.position.y)
+//     c.translate(circle.center.x, circle.center.y)
 //     c.beginPath()
 //     circle.arc()
 //     c.closePath()
@@ -197,13 +204,13 @@ function redrawCanvas() {
 
 window.addEventListener('keydown', function(event) {
     if (event.code == 'KeyD' || event.code == 'ArrowRight') {
-        circle.position.x += 50
+        circle.center.x += 50
     } else if (event.code == 'KeyA' || event.code == 'ArrowLeft') {
-        circle.position.x -= 50
+        circle.center.x -= 50
     } else if (event.code === 'KeyS' || event.code == 'ArrowDown') {
-        circle.position.y += 50
+        circle.center.y += 50
     } else if (event.code === 'KeyW' || event.code == 'ArrowUp') {
-        circle.position.y -= 50
+        circle.center.y -= 50
     }
     preDrawingCircle(circle)
     circle.drawCircle()
