@@ -33,8 +33,12 @@ class Circle {
     checkOverlap(shapes) {
         for (let i = 0; i < shapes.length; i++) {
             if (c.isPointInPath(shapes[i].center.x, shapes[i].center.y)) {
+                if (shapes[i].radius === undefined) {
+                    this.changeCircleSize(7.5)
+                } else {
+                    this.changeCircleSize(-15)
+                }
                 shapes.splice(i, 1)
-                this.changeCircleSize(7.5)
             }
         }
     }
@@ -64,6 +68,60 @@ class Treat {
 
 }
 
+// let x = 500
+// let y = 375
+// let r = 15
+// let arm = r + 7.5
+
+class Mine {
+    constructor(center, radius, arm) {
+        this.center = { ...center }
+        this.radius = radius
+        this.arm = arm
+    }
+
+    drawMine() {
+        c.beginPath()
+        c.arc(this.center.x, this.center.y, this.radius, 0, 2 * Math.PI)
+        c.fillStyle = '#800020'
+        c.fill()
+        
+        c.strokeStyle = '#800020'
+        c.lineWidth = 2
+        
+        c.moveTo(this.center.x - this.arm, this.center.y)
+        c.lineTo(this.center.x + this.arm, this.center.y)
+        c.stroke()
+        
+        c.moveTo(this.center.x, this.center.y - this.arm)
+        c.lineTo(this.center.x, this.center.y + this.arm)
+        c.stroke()
+        
+        let obliqueX = Math.cos(getRadians(45)) * this.arm
+        let obliqueY = Math.sin(getRadians(45)) * this.arm
+        
+        c.moveTo(this.center.x + obliqueX, this.center.y - obliqueY)
+        c.lineTo(this.center.x - obliqueX, this.center.y + obliqueY)
+        c.stroke()
+        
+        c.moveTo(this.center.x - obliqueX, this.center.y - obliqueY)
+        c.lineTo(this.center.x + obliqueX, this.center.y + obliqueY)
+        c.stroke()
+        c.closePath()    
+    }
+}
+
+let mines = []
+
+function generateMines() {
+    for (let i = 0; i < 4; i++) {
+        let mine = new Mine({x: getRandomInt(986), y: getRandomInt(736)}, 10, 15)
+        mines.push(mine)
+    }
+}
+
+generateMines()
+
 
 let treats = []
 
@@ -87,11 +145,17 @@ function preDrawingCircle() {
     for (let treat of treats) {
         treat.drawTreat()
     }
+    for (let mine of mines) {
+        mine.drawMine()
+    }
     c.translate(circle.position.x, circle.position.y)
 }
 
 function postDrawingCircle() {
     circle.checkOverlap(treats)
+
+    circle.checkOverlap(mines)
+    // c.resetTransform()
     // console.log(treats)
     // for (let treat of treats) {
     //     treat.drawTreat()
@@ -110,6 +174,11 @@ function drawAxis() {
     c.moveTo(0, 375)
     c.lineTo(1000, 375)
     c.stroke()
+}
+
+function redrawCanvas() {
+    c.reset()
+
 }
 
 // function drawCircle() {
@@ -143,45 +212,3 @@ window.addEventListener('keydown', function(event) {
 
 
 
-// let x = 500
-// let y = 375
-// let r = 15
-// let arm = r + 7.5
-
-// function drawMine(x, y, r, arm) {
-//     c.beginPath()
-//     c.arc(x, y, r, 0, 2 * Math.PI)
-//     c.fillStyle = '#800020'
-//     c.fill()
-    
-//     c.strokeStyle = '#800020'
-//     c.lineWidth = 2
-    
-//     c.moveTo(x - arm, y)
-//     c.lineTo(x + arm, y)
-//     c.stroke()
-    
-//     c.moveTo(x, y - arm)
-//     c.lineTo(x, y + arm)
-//     c.stroke()
-    
-//     let obliqueX = Math.cos(getRadians(45)) * arm
-//     let obliqueY = Math.sin(getRadians(45)) * arm
-    
-//     console.log(obliqueX)
-//     console.log(obliqueY)
-    
-//     c.moveTo(x + obliqueX, y - obliqueY)
-//     c.lineTo(x - obliqueX, y + obliqueY)
-//     c.stroke()
-    
-//     c.moveTo(x - obliqueX, y - obliqueY)
-//     c.lineTo(x + obliqueX, y + obliqueY)
-//     c.stroke()
-//     c.closePath()    
-// }
-
-// drawMine(100, 375, 10, 15)
-// drawMine(400, 300, 10, 15)
-// drawMine(200, 500, 10, 15)
-// drawMine(900, 700, 10, 15)

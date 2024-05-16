@@ -49,45 +49,82 @@ function getRadians(degrees) {
 // let r = 15
 // let arm = r + 7.5
 
-function drawMine(x, y, r, arm) {
-    c.beginPath()
-    c.arc(x, y, r, 0, 2 * Math.PI)
-    c.fillStyle = 'salmon'
-    c.fill()
+// function drawMine(x, y, r, arm) {
+//     c.beginPath()
+//     c.arc(x, y, r, 0, 2 * Math.PI)
+//     c.fillStyle = 'salmon'
+//     c.fill()
     
-    c.strokeStyle = 'salmon'
-    c.lineWidth = 2
+//     c.strokeStyle = 'salmon'
+//     c.lineWidth = 2
     
-    c.moveTo(x - arm, y)
-    c.lineTo(x + arm, y)
-    c.stroke()
+//     c.moveTo(x - arm, y)
+//     c.lineTo(x + arm, y)
+//     c.stroke()
     
-    c.moveTo(x, y - arm)
-    c.lineTo(x, y + arm)
-    c.stroke()
+//     c.moveTo(x, y - arm)
+//     c.lineTo(x, y + arm)
+//     c.stroke()
     
-    let obliqueX = Math.cos(getRadians(45)) * arm
-    let obliqueY = Math.sin(getRadians(45)) * arm
+//     let obliqueX = Math.cos(getRadians(45)) * arm
+//     let obliqueY = Math.sin(getRadians(45)) * arm
     
-    console.log(obliqueX)
-    console.log(obliqueY)
+//     console.log(obliqueX)
+//     console.log(obliqueY)
     
-    c.moveTo(x + obliqueX, y - obliqueY)
-    c.lineTo(x - obliqueX, y + obliqueY)
-    c.stroke()
+//     c.moveTo(x + obliqueX, y - obliqueY)
+//     c.lineTo(x - obliqueX, y + obliqueY)
+//     c.stroke()
     
-    c.moveTo(x - obliqueX, y - obliqueY)
-    c.lineTo(x + obliqueX, y + obliqueY)
-    c.stroke()
-    c.closePath()    
+//     c.moveTo(x - obliqueX, y - obliqueY)
+//     c.lineTo(x + obliqueX, y + obliqueY)
+//     c.stroke()
+//     c.closePath()    
+// }
+
+
+// drawMine(500, 375, 15, 22.5)
+// drawMine(400, 300, 15, 22.5)
+// drawMine(900, 300, 15, 22.5)
+// drawMine(900, 700, 15, 22.5)
+
+function getRandomInt(max) {
+    return Math.floor(Math.random() * max)
 }
 
+class Treat {
+    constructor(position) {
+        this.position = { ...position }
+        this.size = {
+            width: 15,
+            height: 15
+        }
+        this.center =  {
+            x: Math.ceil(this.position.x + this.size.width / 2),
+            y: Math.ceil(this.position.y + this.size.height / 2)
+        }
+    }
 
-drawMine(500, 375, 15, 22.5)
-drawMine(400, 300, 15, 22.5)
-drawMine(900, 300, 15, 22.5)
-drawMine(900, 700, 15, 22.5)
+    drawTreat() {
+        c.fillStyle = 'orange'
+        c.fillRect(this.position.x, this.position.y, this.size.width, this.size.height)
+    }
 
+}
 
+let treats = []
 
+function generateTreats() {
+    for (let i = 0; i < 10; i++) {
+        let treat = new Treat({x: getRandomInt(986), y: getRandomInt(736)})
+        treats.push(treat)
+    }
+}
 
+generateTreats()
+
+console.log(treats)
+
+for (let treat of treats) {
+    treat.drawTreat()
+}
