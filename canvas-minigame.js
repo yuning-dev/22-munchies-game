@@ -1,8 +1,9 @@
 const canvas = document.getElementById('mainCanvas')
 let c = canvas.getContext('2d')
 
-function getRandomInt(max) {
-    return Math.floor(Math.random() * max)
+// min is inclusive, max is exclusive
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min)) + min
 }
 
 function getRadians(degrees) {
@@ -35,8 +36,10 @@ class Circle {
             let legA = shapes[i].center.x - this.center.x
             let legB = shapes[i].center.y - this.center.y
             if (legA ** 2 + legB ** 2 <= this.radius ** 2) {
-                this.changeCircleSize(7.5)
                 shapes.splice(i, 1)
+                if (this.radius + 7.5 <= 150) {
+                    this.changeCircleSize(7.5)
+                }
             }
         }
     }
@@ -46,10 +49,17 @@ class Circle {
             let legA = circles[i].center.x - this.center.x
             let legB = circles[i].center.y - this.center.y
             if (legA ** 2 + legB ** 2 <= (this.radius + circles[i].arm) ** 2) {
-                console.log('stepping on a mine!!')
-                this.changeCircleSize(-20)
                 circles.splice(i, 1)
+                if (this.radius -20 >= 10) { 
+                    this.changeCircleSize(-20)
+                }
             }
+        }
+        if (circles.length <= 1) {
+            c.reset()
+            c.font = '50px calibri'
+            c.fillStyle = '#E52B50'
+            c.fillText('Game over :(', 385, 388)       
         }
     }
 
@@ -116,11 +126,13 @@ class Mine {
     }
 }
 
+
+
 let mines = []
 
 function generateMines() {
     for (let i = 0; i < 4; i++) {
-        let mine = new Mine({x: getRandomInt(1000 - 15), y: getRandomInt(750 - 15)}, 10, 15)
+        let mine = new Mine({x: getRandomInt(30, 970), y: getRandomInt(30, 720)}, 10, 15)
         mines.push(mine)
     }
 }
@@ -133,12 +145,13 @@ let treats = []
 
 function generateTreats() {
     for (let i = 0; i < 10; i++) {
-        let treat = new Treat({x: getRandomInt(1000 - 15), y: getRandomInt(750 - 15)})
+        let treat = new Treat({x: getRandomInt(0, 1000 - 15), y: getRandomInt(0, 750 - 15)})
         treats.push(treat)
     }
 }
 
 generateTreats()
+console.log(treats)
 
 let circle = new Circle({x: 500, y: 375}, 50)
 preDrawingCircle(circle)
@@ -158,7 +171,7 @@ function preDrawingCircle() {
 }
 
 function postDrawingCircle() {
-    // circle.checkOverlapWithObjCenter(treats)
+    circle.checkOverlapWithObjCenter(treats)
     circle.checkOverlapWithCircle(mines)
 
     // circle.checkOverlap(mines)
@@ -203,19 +216,56 @@ function redrawCanvas() {
 // }
 
 window.addEventListener('keydown', function(event) {
+    let stepDistance = 25
     if (event.code == 'KeyD' || event.code == 'ArrowRight') {
-        circle.center.x += 50
+        if (circle.center.x + stepDistance <= 1000) {
+            circle.center.x += stepDistance
+        }    
     } else if (event.code == 'KeyA' || event.code == 'ArrowLeft') {
-        circle.center.x -= 50
+        if (circle.center.x - stepDistance >= 0) {
+            circle.center.x -= stepDistance
+        } 
     } else if (event.code === 'KeyS' || event.code == 'ArrowDown') {
-        circle.center.y += 50
+        if (circle.center.y + stepDistance <= 750) {
+            circle.center.y += stepDistance
+        }  
     } else if (event.code === 'KeyW' || event.code == 'ArrowUp') {
-        circle.center.y -= 50
+        if (circle.center.y - stepDistance >= 0) {
+            circle.center.y -= stepDistance
+        }
     }
     preDrawingCircle(circle)
     circle.drawCircle()
     postDrawingCircle()
 })
 
+// function drawStar(cx,cy,spikes,outerRadius,innerRadius){
+//     var rot=Math.PI/2*3;
+//     var x=cx;
+//     var y=cy;
+//     var step=Math.PI/spikes;
 
+//     c.beginPath();
+//     c.moveTo(cx,cy-outerRadius)
+//     for(i=0;i<spikes;i++){
+//       x=cx+Math.cos(rot)*outerRadius;
+//       y=cy+Math.sin(rot)*outerRadius;
+//       c.lineTo(x,y)
+//       rot+=step
+
+//       x=cx+Math.cos(rot)*innerRadius;
+//       y=cy+Math.sin(rot)*innerRadius;
+//       c.lineTo(x,y)
+//       rot+=step
+//     }
+//     c.lineTo(cx,cy-outerRadius);
+//     c.closePath();
+//     c.lineWidth=5;
+//     c.strokeStyle='#FAFA33';
+//     c.stroke();
+//     c.fillStyle='#FAFA33';
+//     c.fill();
+//   }
+
+//   drawStar(500,375,5,20,10);
 

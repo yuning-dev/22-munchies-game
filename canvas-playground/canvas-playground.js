@@ -88,43 +88,95 @@ function getRadians(degrees) {
 // drawMine(900, 300, 15, 22.5)
 // drawMine(900, 700, 15, 22.5)
 
-function getRandomInt(max) {
-    return Math.floor(Math.random() * max)
+// function getRandomInt(max) {
+//     return Math.floor(Math.random() * max)
+// }
+
+// class Treat {
+//     constructor(position) {
+//         this.position = { ...position }
+//         this.size = {
+//             width: 15,
+//             height: 15
+//         }
+//         this.center =  {
+//             x: Math.ceil(this.position.x + this.size.width / 2),
+//             y: Math.ceil(this.position.y + this.size.height / 2)
+//         }
+//     }
+
+//     drawTreat() {
+//         c.fillStyle = 'orange'
+//         c.fillRect(this.position.x, this.position.y, this.size.width, this.size.height)
+//     }
+
+// }
+
+// let treats = []
+
+// function generateTreats() {
+//     for (let i = 0; i < 10; i++) {
+//         let treat = new Treat({x: getRandomInt(986), y: getRandomInt(736)})
+//         treats.push(treat)
+//     }
+// }
+
+// generateTreats()
+
+// console.log(treats)
+
+// for (let treat of treats) {
+//     treat.drawTreat()
+// }
+
+function drawAxis() {
+    c.beginPath()
+    c.moveTo(500, 0)
+    c.lineTo(500, 750)
+    c.stroke()
+
+    c.beginPath()
+    c.moveTo(0, 375)
+    c.lineTo(1000, 375)
+    c.stroke()
 }
 
-class Treat {
-    constructor(position) {
-        this.position = { ...position }
-        this.size = {
-            width: 15,
-            height: 15
-        }
-        this.center =  {
-            x: Math.ceil(this.position.x + this.size.width / 2),
-            y: Math.ceil(this.position.y + this.size.height / 2)
-        }
+drawAxis()
+
+c.font = '50px calibri'
+c.fillStyle = '#E52B50'
+c.fillText('Game over', 385, 388)    
+
+
+
+// function to draw a star
+
+function drawStar(cx,cy,spikes,outerRadius,innerRadius){
+    var rot=Math.PI/2*3;
+    var x=cx;
+    var y=cy;
+    var step=Math.PI/spikes;
+
+    c.beginPath();
+    c.moveTo(cx,cy-outerRadius)
+    for(i=0;i<spikes;i++){
+      x=cx+Math.cos(rot)*outerRadius;
+      y=cy+Math.sin(rot)*outerRadius;
+      c.lineTo(x,y)
+      rot+=step
+
+      x=cx+Math.cos(rot)*innerRadius;
+      y=cy+Math.sin(rot)*innerRadius;
+      c.lineTo(x,y)
+      rot+=step
     }
+    c.lineTo(cx,cy-outerRadius);
+    c.closePath();
+    c.lineWidth=5;
+    c.strokeStyle='#FAFA33';
+    c.stroke();
+    c.fillStyle='#FAFA33';
+    c.fill();
+  }
 
-    drawTreat() {
-        c.fillStyle = 'orange'
-        c.fillRect(this.position.x, this.position.y, this.size.width, this.size.height)
-    }
-
-}
-
-let treats = []
-
-function generateTreats() {
-    for (let i = 0; i < 10; i++) {
-        let treat = new Treat({x: getRandomInt(986), y: getRandomInt(736)})
-        treats.push(treat)
-    }
-}
-
-generateTreats()
-
-console.log(treats)
-
-for (let treat of treats) {
-    treat.drawTreat()
-}
+  drawStar(100,100,5,20,10);
