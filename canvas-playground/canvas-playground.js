@@ -129,23 +129,23 @@ function getRadians(degrees) {
 //     treat.drawTreat()
 // }
 
-function drawAxis() {
-    c.beginPath()
-    c.moveTo(500, 0)
-    c.lineTo(500, 750)
-    c.stroke()
+// function drawAxis() {
+//     c.beginPath()
+//     c.moveTo(500, 0)
+//     c.lineTo(500, 750)
+//     c.stroke()
 
-    c.beginPath()
-    c.moveTo(0, 375)
-    c.lineTo(1000, 375)
-    c.stroke()
-}
+//     c.beginPath()
+//     c.moveTo(0, 375)
+//     c.lineTo(1000, 375)
+//     c.stroke()
+// }
 
-drawAxis()
+// drawAxis()
 
-c.font = '50px calibri'
-c.fillStyle = '#E52B50'
-c.fillText('Game over', 385, 388)    
+// c.font = '50px calibri'
+// c.fillStyle = '#E52B50'
+// c.fillText('Game over', 385, 388)    
 
 
 
@@ -180,3 +180,29 @@ function drawStar(cx,cy,spikes,outerRadius,innerRadius){
   }
 
   drawStar(100,100,5,20,10);
+
+  c.arc(50, 100, 25, 0, 2*Math.PI)
+  c.strokeStyle = 'green'
+  c.stroke()
+
+
+  let x = 0
+  let y = 0
+  c.arc(x, y, 25, 0, 2*Math.PI)
+  c.strokeStyle = 'green'
+  c.stroke()
+
+  
+window.addEventListener('keydown', function(event) {
+  let stepDistance = 25
+  if (event.code == 'KeyD' || event.code == 'ArrowRight') {
+      x += stepDistance 
+  } else if (event.code == 'KeyA' || event.code == 'ArrowLeft') {
+      x -= stepDistance
+  } else if (event.code === 'KeyS' || event.code == 'ArrowDown') {
+      y += stepDistance
+  } else if (event.code === 'KeyW' || event.code == 'ArrowUp') {
+      y -= stepDistance
+  }
+  c.translate(x, y)
+})
