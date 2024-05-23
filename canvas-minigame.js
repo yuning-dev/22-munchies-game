@@ -1,6 +1,11 @@
 const canvas = document.getElementById('mainCanvas')
 let c = canvas.getContext('2d')
 
+const canvasX = 1000
+const canvasY = 750
+
+const gridSize = 25
+
 // min is inclusive, max is exclusive
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min)) + min
@@ -83,24 +88,28 @@ class Circle {
 }
 
 class Treat {
-    constructor(position) {
-        this.position = { ...position }
+    constructor(center) {
+        this.center = { ...center }
         this.size = {
             width: 15,
             height: 15
         }
-        this.center =  {
-            x: Math.ceil(this.position.x + this.size.width / 2),
-            y: Math.ceil(this.position.y + this.size.height / 2)
+        this.topLeft =  {
+            x: this.center.x - (this.size.width / 2),
+            y: this.center.y - (this.size.height / 2)
         }
     }
 
     drawTreat() {
         c.fillStyle = 'orange'
-        c.fillRect(this.position.x, this.position.y, this.size.width, this.size.height)
+        c.fillRect(this.topLeft.x, this.topLeft.y, this.size.width, this.size.height)
     }
 
 }
+
+// c.arc(25, 25, 7.5, 0, 2 * Math.PI)
+// c.stroke()
+
 
 class Mine {
     constructor(center, radius, arm) {
@@ -168,7 +177,8 @@ function redrawCanvas() {
     }
 }
 
-let star = new Star({x: getRandomInt(20, 980), y: getRandomInt(20, 730)}, 5, 20, 10)
+let star = new Star({x: getRandomInt(20, canvasX - 20), y: getRandomInt(20, canvasY - 20)}, 5, 20, 10)
+let grid = new Map
 
 function displayWinMessage() {
     c.reset()
@@ -189,7 +199,8 @@ function checkLossCondition(mines) {
 let mines = []
 function generateMines() {
     for (let i = 0; i < 4; i++) {
-        let mine = new Mine({x: getRandomInt(30, 970), y: getRandomInt(30, 720)}, 10, 15)
+        let mine = new Mine({x: getRandomInt(15, canvasX - 15), y: getRandomInt(15, canvasY - 15)}, 10, 15)
+        // updateGridCoordinates(mine)
         mines.push(mine)
     }
 }
@@ -199,14 +210,69 @@ generateMines()
 let treats = []
 function generateTreats() {
     for (let i = 0; i < 10; i++) {
-        let treat = new Treat({x: getRandomInt(0, 1000 - 15), y: getRandomInt(0, 750 - 15)})
+        let treat = new Treat({x: getRandomInt(0, canvasX/gridSize - 1) * gridSize + gridSize/2, y: getRandomInt(0, canvasY/gridSize - 1) * gridSize + gridSize/2})
+        updateGridCoordinates(treat)
         treats.push(treat)
     }
 }
 generateTreats()
 
 
-let circle = new Circle({x: 500, y: 375}, 50)
+
+function getGridString(pxCoordinates) {
+    let gridX = Math.floor(pxCoordinates.x / gridSize)
+    let gridY = Math.floor(pxCoordinates.y / gridSize)
+    return `${ gridX }, ${ gridY}`
+}
+
+function updateGridCoordinates(entity) {
+    let gridString = getGridString(entity.center)
+    while (grid.has(gridString)) {
+        if (entity instanceof Treat) {
+            entity.center.x = getRandomInt(0, canvasX - gridSize) + gridSize/2
+            entity.center.y = getRandomInt(0, canvasY - gridSize) + gridSize/2
+        } else if (entity instanceof Mine) {
+            entity.center.x = getRandomInt(entity.arm, canvasX - entity.arm)
+            entity.center.y = getRandomInt(entity.arm, canvasY - entity.arm)
+        } else if (entity instanceof Star) {
+            entity.center.x = getRandomInt(entity.outerRadius, canvasX - entity.outerRadius)
+            entity.center.y = getRandomInt(entity.outerRadius, canvasY - entity.outerRadius)
+        } else {
+            entity.center.x = getRandomInt(entity.radius, canvasX - entity.radius)
+            entity.center.y = getRandomInt(entity.radius, canvasY - entity.radius)
+        }
+        gridString = getGridString(entity.center)
+    }
+    
+    let entityType = null
+    if (entity instanceof Treat) {
+        entityType = 'Treat'
+    } else if (entity instanceof Mine) {
+        entityType = 'Mine'
+    } else if (entity instanceof Star) {
+        entityType = 'Star'
+    } else {
+        entityType = 'Circle'
+    }
+
+    // if (!grid.has(gridString)) {
+    //     grid.set(gridString, entityType)
+    //     entity.center.x = Math.floor(entity.center.x / gridSize) * gridSize + (gridSize / 2)
+    //     entity.center.y = Math.floor(entity.center.y / gridSize) * gridSize + (gridSize / 2)
+    // }
+
+    console.log(entity.center.x, entity.center.y)
+    // let testX = (entity.center.x - 12.5) / 25
+    // let testY = (entity.center.y - 12.5) / 25
+
+    // console.log(testX, testY)
+}
+
+// console.log(grid)
+
+
+
+let circle = new Circle({x: canvasX / 2, y: canvasY / 2}, 50)
 preDrawingCircle(treats, mines)
 circle.drawCircle()
 postDrawingCircle(treats, mines)
@@ -216,10 +282,22 @@ function preDrawingCircle(treats, mines) {
     drawAxis()
     for (let treat of treats) {
         treat.drawTreat()
+        console.log(treat.center.x, treat.center.y)
     }
-    for (let mine of mines) {
-        mine.drawMine()
-    }
+    // c.fillStyle = 'green'
+    // let testTreat = new Treat({x: 25, y: 25})
+    // let testTreat2 = new Treat({x: 25, y: 50})
+    // let testTreat3 = new Treat({x: 50, y: 25})
+    // let testTreat4 = new Treat({x: 25, y: 625})
+    // testTreat.drawTreat()
+    // testTreat2.drawTreat()
+    // testTreat3.drawTreat()
+    // testTreat4.drawTreat()
+
+    // for (let mine of mines) {
+    //     mine.drawMine()
+    //     console.log(mine.center.x, mine.center.y)
+    // }
 }
 
 function postDrawingCircle(treats, mines) {
@@ -251,7 +329,7 @@ function drawStar(center, spikes, outerRadius, innerRadius) {
 
     c.beginPath();
     c.moveTo( center.x, center.y- outerRadius)
-    for(let i=0;i<  spikes;i++){
+    for(let i=0;i< spikes;i++){
       x= center.x+Math.cos(rot) * outerRadius;
       y= center.y+Math.sin(rot) * outerRadius;
       c.lineTo(x,y)
@@ -274,7 +352,7 @@ function drawStar(center, spikes, outerRadius, innerRadius) {
 
 
 window.addEventListener('keydown', function(event) {
-    let stepDistance = 25
+    let stepDistance = gridSize
     if (event.code == 'KeyD' || event.code == 'ArrowRight') {
         if (circle.center.x + stepDistance <= 1000) {
             circle.center.x += stepDistance
@@ -296,8 +374,3 @@ window.addEventListener('keydown', function(event) {
     circle.drawCircle()
     postDrawingCircle(treats, mines)
 })
-
-
-
-
-
