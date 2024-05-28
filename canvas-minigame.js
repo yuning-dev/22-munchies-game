@@ -6,6 +6,8 @@ const canvasY = 750
 
 const gridSize = 25
 
+let gameWon = false
+
 // min is inclusive, max is exclusive
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min)) + min
@@ -60,6 +62,9 @@ class Circle {
         let legA = star.center.x - this.center.x
         let legB = star.center.y - this.center.y
         if (legA ** 2 + legB ** 2 <= this.radius ** 2) {
+            gameWon = true
+        }
+        if (gameWon) {
             displayWinMessage()
         }
     }
@@ -185,7 +190,7 @@ function randomiseGridCanvasHalf(canvasXY, gridSize, circleRadius) {
 
 function generateMines() {
     for (let i = 0; i < 4; i++) {
-        let mine = new Mine({x: randomiseCanvasHalf(17.5, canvasX, circle.radius), y: randomiseCanvasHalf(50, canvasY, circle.radius)}, 10, 15)
+        let mine = new Mine({x: randomiseCanvasHalf(17.5, canvasX, circle.radius), y: randomiseCanvasHalf(50, canvasY, circle.radius)}, 7.5, 12.5)
         updateGridCoordinates(mine)
         console.log(mine.center)
         mines.push(mine)
@@ -233,7 +238,7 @@ function displayWinMessage() {
     c.reset()
     c.font = '50px calibri'
     c.fillStyle = '#ADFF2F'
-    c.fillText('You won :D', 385, 388) 
+    c.fillText('You won :D', 385, 388)
 }
 
 function checkLossCondition(mines) {
