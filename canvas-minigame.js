@@ -71,7 +71,7 @@ class Circle {
             if (legA ** 2 + legB ** 2 <= (this.radius + circles[i].arm) ** 2) {
                 circles.splice(i, 1)
                 if (this.radius -20 >= 10) { 
-                    this.changeCircleSize(-20)
+                    this.changeCircleSize(-15)
                 }
                 redrawCanvas()
                 for (let circle of circles) {
@@ -106,9 +106,6 @@ class Treat {
     }
 
 }
-
-// c.arc(25, 25, 7.5, 0, 2 * Math.PI)
-// c.stroke()
 
 
 class Mine {
@@ -162,23 +159,75 @@ class Star {
     }
 }
 
+
+
+
+let grid = new Map
+let circle = new Circle({x: canvasX / 2, y: canvasY / 2}, 50)
+
+let mines = []
+
+function randomiseCanvasHalf(margin, canvasXY, circleRadius) {
+    if (getRandomInt(0, 2) === 0) {
+        return getRandomInt(margin, canvasXY/2 - circleRadius)
+    } else {
+        return getRandomInt(canvasXY/2 + circleRadius, canvasXY - margin)
+    }
+}
+
+function randomiseGridCanvasHalf(canvasXY, gridSize, circleRadius) {
+    if (getRandomInt(0, 2) === 0) {
+        return getRandomInt(0, canvasXY/gridSize/2 - circleRadius/gridSize) * gridSize + gridSize/2
+    } else {
+        return getRandomInt(canvasXY/gridSize/2 + circleRadius/gridSize, canvasXY/gridSize) * gridSize + gridSize/2
+    }
+}
+
+function generateMines() {
+    for (let i = 0; i < 4; i++) {
+        let mine = new Mine({x: randomiseCanvasHalf(17.5, canvasX, circle.radius), y: randomiseCanvasHalf(50, canvasY, circle.radius)}, 10, 15)
+        updateGridCoordinates(mine)
+        console.log(mine.center)
+        mines.push(mine)
+    }
+}
+generateMines()
+
+
+let treats = []
+function generateTreats() {
+    for (let i = 0; i < 10; i++) {
+        let treat = new Treat({x: randomiseGridCanvasHalf(canvasX, gridSize, circle.radius), y: randomiseGridCanvasHalf(canvasY, gridSize, circle.radius)})
+        updateGridCoordinates(treat)
+        console.log(treat.center)
+        treats.push(treat)
+    }
+}
+generateTreats()
+
+preDrawingCircle(treats, mines)
+circle.drawCircle()
+postDrawingCircle(treats, mines)
+
+let star = new Star({x: getRandomInt(20, canvasX - 20), y: getRandomInt(20, canvasY - 20)}, 5, 20, 10)
+
+
+
+
 function redrawCanvas() {
     c.reset()
     drawAxis()
-    for (let treat of treats) {
-        treat.drawTreat()
-    }
     for (let mine of mines) {
         mine.drawMine()
+    }
+    for (let treat of treats) {
+        treat.drawTreat()
     }
     circle.drawCircle()
     if (treats.length === 0 ) {
         star.draw()
     }
 }
-
-let star = new Star({x: getRandomInt(20, canvasX - 20), y: getRandomInt(20, canvasY - 20)}, 5, 20, 10)
-let grid = new Map
 
 function displayWinMessage() {
     c.reset()
@@ -195,28 +244,6 @@ function checkLossCondition(mines) {
         c.fillText('Game over :(', 385, 388)       
     }
 }
-
-let mines = []
-function generateMines() {
-    for (let i = 0; i < 4; i++) {
-        let mine = new Mine({x: getRandomInt(15, canvasX - 15), y: getRandomInt(15, canvasY - 15)}, 10, 15)
-        // updateGridCoordinates(mine)
-        mines.push(mine)
-    }
-}
-generateMines()
-
-
-let treats = []
-function generateTreats() {
-    for (let i = 0; i < 10; i++) {
-        let treat = new Treat({x: getRandomInt(0, canvasX/gridSize - 1) * gridSize + gridSize/2, y: getRandomInt(0, canvasY/gridSize - 1) * gridSize + gridSize/2})
-        updateGridCoordinates(treat)
-        treats.push(treat)
-    }
-}
-generateTreats()
-
 
 
 function getGridString(pxCoordinates) {
@@ -255,49 +282,35 @@ function updateGridCoordinates(entity) {
         entityType = 'Circle'
     }
 
-    // if (!grid.has(gridString)) {
-    //     grid.set(gridString, entityType)
-    //     entity.center.x = Math.floor(entity.center.x / gridSize) * gridSize + (gridSize / 2)
-    //     entity.center.y = Math.floor(entity.center.y / gridSize) * gridSize + (gridSize / 2)
-    // }
-
-    console.log(entity.center.x, entity.center.y)
-    // let testX = (entity.center.x - 12.5) / 25
-    // let testY = (entity.center.y - 12.5) / 25
-
-    // console.log(testX, testY)
+    if (!grid.has(gridString)) {
+        // if (!(entity instanceof Treat)) {
+            grid.set(gridString, entityType)
+            entity.center.x = Math.floor(entity.center.x / gridSize) * gridSize + (gridSize / 2)
+            entity.center.y = Math.floor(entity.center.y / gridSize) * gridSize + (gridSize / 2)
+        // }
+    }
 }
 
-// console.log(grid)
-
-
-
-let circle = new Circle({x: canvasX / 2, y: canvasY / 2}, 50)
-preDrawingCircle(treats, mines)
-circle.drawCircle()
-postDrawingCircle(treats, mines)
 
 function preDrawingCircle(treats, mines) {
     c.reset()
     drawAxis()
     for (let treat of treats) {
         treat.drawTreat()
-        console.log(treat.center.x, treat.center.y)
     }
     // c.fillStyle = 'green'
-    // let testTreat = new Treat({x: 25, y: 25})
-    // let testTreat2 = new Treat({x: 25, y: 50})
-    // let testTreat3 = new Treat({x: 50, y: 25})
-    // let testTreat4 = new Treat({x: 25, y: 625})
+    // let testTreat = new Treat({x: 12.5, y: 12.5})
+    // let testTreat2 = new Treat({x: 12.5, y: 37.5})
+    // let testTreat3 = new Treat({x: 37.5, y: 12.5})
+    // let testTreat4 = new Treat({x: 12.5, y: 625})
     // testTreat.drawTreat()
     // testTreat2.drawTreat()
     // testTreat3.drawTreat()
     // testTreat4.drawTreat()
 
-    // for (let mine of mines) {
-    //     mine.drawMine()
-    //     console.log(mine.center.x, mine.center.y)
-    // }
+    for (let mine of mines) {
+        mine.drawMine()
+    }
 }
 
 function postDrawingCircle(treats, mines) {
@@ -307,6 +320,32 @@ function postDrawingCircle(treats, mines) {
         circle.checkOverlapWithStar()
     }
 }
+
+
+window.addEventListener('keydown', function(event) {
+    let stepDistance = gridSize
+    if (event.code == 'KeyD' || event.code == 'ArrowRight') {
+        if (circle.center.x + stepDistance <= 1000) {
+            circle.center.x += stepDistance
+        }    
+    } else if (event.code == 'KeyA' || event.code == 'ArrowLeft') {
+        if (circle.center.x - stepDistance >= 0) {
+            circle.center.x -= stepDistance
+        } 
+    } else if (event.code === 'KeyS' || event.code == 'ArrowDown') {
+        if (circle.center.y + stepDistance <= 750) {
+            circle.center.y += stepDistance
+        }  
+    } else if (event.code === 'KeyW' || event.code == 'ArrowUp') {
+        if (circle.center.y - stepDistance >= 0) {
+            circle.center.y -= stepDistance
+        }
+    }
+    preDrawingCircle(treats, mines)
+    circle.drawCircle()
+    postDrawingCircle(treats, mines)
+})
+
 
 function drawAxis() {
     c.beginPath()
@@ -348,29 +387,3 @@ function drawStar(center, spikes, outerRadius, innerRadius) {
     c.fillStyle='#FFD700';
     c.fill();
 }
-
-
-
-window.addEventListener('keydown', function(event) {
-    let stepDistance = gridSize
-    if (event.code == 'KeyD' || event.code == 'ArrowRight') {
-        if (circle.center.x + stepDistance <= 1000) {
-            circle.center.x += stepDistance
-        }    
-    } else if (event.code == 'KeyA' || event.code == 'ArrowLeft') {
-        if (circle.center.x - stepDistance >= 0) {
-            circle.center.x -= stepDistance
-        } 
-    } else if (event.code === 'KeyS' || event.code == 'ArrowDown') {
-        if (circle.center.y + stepDistance <= 750) {
-            circle.center.y += stepDistance
-        }  
-    } else if (event.code === 'KeyW' || event.code == 'ArrowUp') {
-        if (circle.center.y - stepDistance >= 0) {
-            circle.center.y -= stepDistance
-        }
-    }
-    preDrawingCircle(treats, mines)
-    circle.drawCircle()
-    postDrawingCircle(treats, mines)
-})
