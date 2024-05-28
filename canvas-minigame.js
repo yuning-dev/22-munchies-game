@@ -6,8 +6,6 @@ const canvasY = 750
 
 const gridSize = 25
 
-let gameWon = false
-
 // min is inclusive, max is exclusive
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min)) + min
@@ -62,9 +60,9 @@ class Circle {
         let legA = star.center.x - this.center.x
         let legB = star.center.y - this.center.y
         if (legA ** 2 + legB ** 2 <= this.radius ** 2) {
-            gameWon = true
+            gameStateInst.win = true
         }
-        if (gameWon) {
+        if (gameStateInst.win) {
             displayWinMessage()
         }
     }
@@ -84,7 +82,10 @@ class Circle {
                 }
             }
         }
-        checkLossCondition(circles)
+        if (circles.length <= 1) {
+            gameStateInst.loss = true
+            displayLossMessage()
+        }
     }
 
     changeCircleSize(delta) {
@@ -164,8 +165,12 @@ class Star {
     }
 }
 
-
-
+class gameState {
+    constructor(win, loss) {
+        this.win = win
+        this.loss = loss
+    }
+}
 
 let grid = new Map
 let circle = new Circle({x: canvasX / 2, y: canvasY / 2}, 50)
@@ -192,7 +197,6 @@ function generateMines() {
     for (let i = 0; i < 4; i++) {
         let mine = new Mine({x: randomiseCanvasHalf(17.5, canvasX, circle.radius), y: randomiseCanvasHalf(50, canvasY, circle.radius)}, 7.5, 12.5)
         updateGridCoordinates(mine)
-        console.log(mine.center)
         mines.push(mine)
     }
 }
@@ -204,7 +208,6 @@ function generateTreats() {
     for (let i = 0; i < 10; i++) {
         let treat = new Treat({x: randomiseGridCanvasHalf(canvasX, gridSize, circle.radius), y: randomiseGridCanvasHalf(canvasY, gridSize, circle.radius)})
         updateGridCoordinates(treat)
-        console.log(treat.center)
         treats.push(treat)
     }
 }
@@ -216,6 +219,7 @@ postDrawingCircle(treats, mines)
 
 let star = new Star({x: getRandomInt(20, canvasX - 20), y: getRandomInt(20, canvasY - 20)}, 5, 20, 10)
 
+let gameStateInst = new gameState(false, false)
 
 
 
@@ -237,19 +241,22 @@ function redrawCanvas() {
 function displayWinMessage() {
     c.reset()
     c.font = '50px calibri'
-    c.fillStyle = '#ADFF2F'
-    c.fillText('You won :D', 385, 388)
+    c.fillStyle = '#20B2AA'
+    c.fillText('You won :D', 380, 335)
+    c.font = '30px calibri'
+    c.fillStyle = 'orange'
+    c.fillText('Press Enter to play again', 340, 405)
 }
 
-function checkLossCondition(mines) {
-    if (mines.length <= 1) {
-        c.reset()
-        c.font = '50px calibri'
-        c.fillStyle = '#E52B50'
-        c.fillText('Game over :(', 385, 388)       
-    }
+function displayLossMessage() {
+    c.reset()
+    c.font = '50px calibri'
+    c.fillStyle = '#E52B50'
+    c.fillText('Game over :(', 385, 335)
+    c.font = '35px calibri'
+    c.fillStyle = 'orange'
+    c.fillText('Press Enter to play again', 340, 405)       
 }
-
 
 function getGridString(pxCoordinates) {
     let gridX = Math.floor(pxCoordinates.x / gridSize)
@@ -349,7 +356,30 @@ window.addEventListener('keydown', function(event) {
     preDrawingCircle(treats, mines)
     circle.drawCircle()
     postDrawingCircle(treats, mines)
+
+    if (event.code == 'Enter') {
+        if (gameStateInst.win || gameStateInst.loss) {
+            console.log('enter pressed')
+            resetGame()
+        }
+    }
 })
+
+function resetGame() {
+    treats.length = 0
+    mines.length = 0
+    circle.center.x = 500
+    circle.center.y = 375
+    circle.radius = 50
+    generateMines()
+    generateTreats()
+    redrawCanvas()
+    preDrawingCircle(treats, mines)
+    circle.drawCircle()
+    postDrawingCircle(treats, mines)
+    gameStateInst.win = false
+    gameStateInst.loss = false
+}
 
 
 function drawAxis() {
