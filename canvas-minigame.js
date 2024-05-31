@@ -41,7 +41,9 @@ class Circle {
             let legA = shapes[i].center.x - this.center.x
             let legB = shapes[i].center.y - this.center.y
             if (legA ** 2 + legB ** 2 <= this.radius ** 2) {
+                console.log('nom nom nom')
                 shapes.splice(i, 1)
+                console.log(shapes)
                 if (this.radius + 7.5 <= 150) {
                     this.changeCircleSize(7.5)
                 }
@@ -195,7 +197,7 @@ function randomiseGridCanvasHalf(canvasXY, gridSize, circleRadius) {
 
 function generateMines() {
     for (let i = 0; i < 4; i++) {
-        let mine = new Mine({x: randomiseCanvasHalf(17.5, canvasX, circle.radius), y: randomiseCanvasHalf(50, canvasY, circle.radius)}, 7.5, 12.5)
+        let mine = new Mine({x: randomiseCanvasHalf(17.5, canvasX, circle.radius), y: randomiseCanvasHalf(17.5, canvasY, circle.radius)}, 7.5, 12.5)
         updateGridCoordinates(mine)
         mines.push(mine)
     }
