@@ -1,31 +1,27 @@
 const canvas = document.getElementById('mainCanvas')
-let c = canvas.getContext('2d')
+const c = canvas.getContext('2d')
 
-const canvasX = 1000
-const canvasY = 750
+const canvasWidth = 1000
+const canvasHeight = 750
 
 const gridSize = 25
+
+const circleGrowthAmount = 7.5
+const maxCircleSize = 150
 
 // min is inclusive, max is exclusive
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min)) + min
 }
 
-function getRadians(degrees) {
+function degreesToRadians(degrees) {
     return degrees * Math.PI / 180
 }
-
-// class Entity {
-//     constructor() {
-
-//     }
-// }
 
 class Circle {
     constructor(center, radius) {
         this.center = { ...center }
         this.radius = radius
-        // console.log(JSON.stringify(ob))
     }
 
     drawCircle() {
@@ -44,13 +40,12 @@ class Circle {
                 console.log('nom nom nom')
                 shapes.splice(i, 1)
                 console.log(shapes)
-                if (this.radius + 7.5 <= 150) {
-                    this.changeCircleSize(7.5)
+                if (this.radius + circleGrowthAmount <= maxCircleSize) {
+                    this.changeCircleSize(circleGrowthAmount)
                 }
                 redrawCanvas()
-                for (let shape of shapes) {
-                    shape.drawTreat()
-                }
+                for (let shape of shapes) 
+                    shape.draw()
             }
         }
         if (shapes.length === 0) {
@@ -80,7 +75,7 @@ class Circle {
                 }
                 redrawCanvas()
                 for (let circle of circles) {
-                    circle.drawMine()
+                    circle.draw()
                 }
             }
         }
@@ -108,7 +103,7 @@ class Treat {
         }
     }
 
-    drawTreat() {
+    draw() {
         c.fillStyle = 'orange'
         c.fillRect(this.topLeft.x, this.topLeft.y, this.size.width, this.size.height)
     }
@@ -123,7 +118,7 @@ class Mine {
         this.arm = arm
     }
 
-    drawMine() {
+    draw() {
         c.beginPath()
         c.arc(this.center.x, this.center.y, this.radius, 0, 2 * Math.PI)
         c.fillStyle = '#800020'
@@ -140,8 +135,8 @@ class Mine {
         c.lineTo(this.center.x, this.center.y + this.arm)
         c.stroke()
         
-        let obliqueX = Math.cos(getRadians(45)) * this.arm
-        let obliqueY = Math.sin(getRadians(45)) * this.arm
+        let obliqueX = Math.cos(degreesToRadians(45)) * this.arm
+        let obliqueY = Math.sin(degreesToRadians(45)) * this.arm
         
         c.moveTo(this.center.x + obliqueX, this.center.y - obliqueY)
         c.lineTo(this.center.x - obliqueX, this.center.y + obliqueY)
@@ -167,7 +162,7 @@ class Star {
     }
 }
 
-class gameState {
+class GameState {
     constructor(win, loss) {
         this.win = win
         this.loss = loss
@@ -175,7 +170,7 @@ class gameState {
 }
 
 let grid = new Map
-let circle = new Circle({x: canvasX / 2, y: canvasY / 2}, 50)
+let circle = new Circle({x: canvasWidth / 2, y: canvasHeight / 2}, 50)
 
 let mines = []
 
@@ -197,7 +192,7 @@ function randomiseGridCanvasHalf(canvasXY, gridSize, circleRadius) {
 
 function generateMines() {
     for (let i = 0; i < 4; i++) {
-        let mine = new Mine({x: randomiseCanvasHalf(17.5, canvasX, circle.radius), y: randomiseCanvasHalf(17.5, canvasY, circle.radius)}, 7.5, 12.5)
+        let mine = new Mine({x: randomiseCanvasHalf(17.5, canvasWidth, circle.radius), y: randomiseCanvasHalf(17.5, canvasHeight, circle.radius)}, 7.5, 12.5)
         updateGridCoordinates(mine)
         mines.push(mine)
     }
@@ -208,7 +203,7 @@ generateMines()
 let treats = []
 function generateTreats() {
     for (let i = 0; i < 10; i++) {
-        let treat = new Treat({x: randomiseGridCanvasHalf(canvasX, gridSize, circle.radius), y: randomiseGridCanvasHalf(canvasY, gridSize, circle.radius)})
+        let treat = new Treat({x: randomiseGridCanvasHalf(canvasWidth, gridSize, circle.radius), y: randomiseGridCanvasHalf(canvasHeight, gridSize, circle.radius)})
         updateGridCoordinates(treat)
         treats.push(treat)
     }
@@ -219,9 +214,9 @@ preDrawingCircle(treats, mines)
 circle.drawCircle()
 postDrawingCircle(treats, mines)
 
-let star = new Star({x: getRandomInt(20, canvasX - 20), y: getRandomInt(20, canvasY - 20)}, 5, 20, 10)
+let star = new Star({x: getRandomInt(20, canvasWidth - 20), y: getRandomInt(20, canvasHeight - 20)}, 5, 20, 10)
 
-let gameStateInst = new gameState(false, false)
+const gameStateInst = new GameState(false, false)
 
 
 
@@ -229,10 +224,10 @@ function redrawCanvas() {
     c.reset()
     drawAxis()
     for (let mine of mines) {
-        mine.drawMine()
+        mine.draw()
     }
     for (let treat of treats) {
-        treat.drawTreat()
+        treat.draw()
     }
     circle.drawCircle()
     if (treats.length === 0 ) {
@@ -270,17 +265,17 @@ function updateGridCoordinates(entity) {
     let gridString = getGridString(entity.center)
     while (grid.has(gridString)) {
         if (entity instanceof Treat) {
-            entity.center.x = getRandomInt(0, canvasX - gridSize) + gridSize/2
-            entity.center.y = getRandomInt(0, canvasY - gridSize) + gridSize/2
+            entity.center.x = getRandomInt(0, canvasWidth - gridSize) + gridSize/2
+            entity.center.y = getRandomInt(0, canvasHeight - gridSize) + gridSize/2
         } else if (entity instanceof Mine) {
-            entity.center.x = getRandomInt(entity.arm, canvasX - entity.arm)
-            entity.center.y = getRandomInt(entity.arm, canvasY - entity.arm)
+            entity.center.x = getRandomInt(entity.arm, canvasWidth - entity.arm)
+            entity.center.y = getRandomInt(entity.arm, canvasHeight - entity.arm)
         } else if (entity instanceof Star) {
-            entity.center.x = getRandomInt(entity.outerRadius, canvasX - entity.outerRadius)
-            entity.center.y = getRandomInt(entity.outerRadius, canvasY - entity.outerRadius)
+            entity.center.x = getRandomInt(entity.outerRadius, canvasWidth - entity.outerRadius)
+            entity.center.y = getRandomInt(entity.outerRadius, canvasHeight - entity.outerRadius)
         } else {
-            entity.center.x = getRandomInt(entity.radius, canvasX - entity.radius)
-            entity.center.y = getRandomInt(entity.radius, canvasY - entity.radius)
+            entity.center.x = getRandomInt(entity.radius, canvasWidth - entity.radius)
+            entity.center.y = getRandomInt(entity.radius, canvasHeight - entity.radius)
         }
         gridString = getGridString(entity.center)
     }
@@ -310,20 +305,10 @@ function preDrawingCircle(treats, mines) {
     c.reset()
     drawAxis()
     for (let treat of treats) {
-        treat.drawTreat()
+        treat.draw()
     }
-    // c.fillStyle = 'green'
-    // let testTreat = new Treat({x: 12.5, y: 12.5})
-    // let testTreat2 = new Treat({x: 12.5, y: 37.5})
-    // let testTreat3 = new Treat({x: 37.5, y: 12.5})
-    // let testTreat4 = new Treat({x: 12.5, y: 625})
-    // testTreat.drawTreat()
-    // testTreat2.drawTreat()
-    // testTreat3.drawTreat()
-    // testTreat4.drawTreat()
-
     for (let mine of mines) {
-        mine.drawMine()
+        mine.draw()
     }
 }
 
@@ -398,29 +383,30 @@ function drawAxis() {
 
 // below is an adaptation of a utility function for drawing starts
 function drawStar(center, spikes, outerRadius, innerRadius) {
-    var rot=Math.PI/2*3;
-    var x= center.x;
-    var y= center.y;
-    var step=Math.PI/  spikes;
+    let rot = Math.PI/2 * 3
+    let x = center.x
+    let y = center.y
+    const step = Math.PI / spikes
 
-    c.beginPath();
-    c.moveTo( center.x, center.y- outerRadius)
-    for(let i=0;i< spikes;i++){
-      x= center.x+Math.cos(rot) * outerRadius;
-      y= center.y+Math.sin(rot) * outerRadius;
-      c.lineTo(x,y)
-      rot+=step
+    c.beginPath()
+    c.moveTo(center.x, center.y - outerRadius)
+    for (let i = 0; i < spikes; i++){
+      x = center.x + Math.cos(rot) * outerRadius
+      y = center.y + Math.sin(rot) * outerRadius
+      c.lineTo(x, y)
+      rot += step
 
-      x= center.x+Math.cos(rot) * innerRadius;
-      y= center.y+Math.sin(rot) * innerRadius;
-      c.lineTo(x,y)
-      rot+=step
+      x = center.x + Math.cos(rot) * innerRadius
+      y = center.y + Math.sin(rot) * innerRadius
+      c.lineTo(x, y)
+      rot += step
     }
-    c.lineTo( center.x, center.y- outerRadius);
-    c.closePath();
-    c.lineWidth=5;
-    c.strokeStyle='#FFD700';
-    c.stroke();
-    c.fillStyle='#FFD700';
-    c.fill();
+
+    c.lineTo(center.x, center.y - outerRadius)
+    c.closePath()
+    c.lineWidth = 5
+    c.strokeStyle = '#FFD700'
+    c.stroke()
+    c.fillStyle = '#FFD700'
+    c.fill()
 }
