@@ -32,25 +32,13 @@ class Circle {
         c.fill()
     }
 
-    checkOverlapWithObjCenter(shapes) {
-        for (let i = 0; i < shapes.length; i++) {
-            let legA = shapes[i].center.x - this.center.x
-            let legB = shapes[i].center.y - this.center.y
-            if (legA ** 2 + legB ** 2 <= this.radius ** 2) {
-                console.log('nom nom nom')
-                shapes.splice(i, 1)
-                console.log(shapes)
-                if (this.radius + circleGrowthAmount <= maxCircleSize) {
-                    this.changeCircleSize(circleGrowthAmount)
-                }
-                redrawCanvas()
-                for (let shape of shapes) 
-                    shape.draw(c)
-            }
+    checkOverlapWithShapeCenter(shape) {
+        let legA = shape.center.x - this.center.x
+        let legB = shape.center.y - this.center.y
+        if (legA ** 2 + legB ** 2 <= this.radius ** 2) {
+            return true
         }
-        if (shapes.length === 0) {
-            star.draw(c) 
-        }
+        return false
     }
 
     checkOverlapWithStar() {
@@ -169,6 +157,31 @@ class GameState {
     }
 }
 
+function handleTreatsCollision(circle, treats) {
+    // console.log('nom nom nom')
+    for (let i = 0; i < treats.length; i++) {
+        if (circle.checkOverlapWithShapeCenter(treats[i])) {
+            // console.log('nom nom nom')
+            treats.splice(i, 1)
+            // console.log(treats)
+            if (circle.radius + circleGrowthAmount <= maxCircleSize) {
+                circle.changeCircleSize(circleGrowthAmount)
+            }
+            redrawCanvas()
+            for (let treat of treats) {
+                treat.draw(c)
+            }
+            checkIfDrawStar(treats, star)
+        }
+    }
+}
+
+function checkIfDrawStar(treats, star) {
+    if (treats.length === 0) {
+        star.draw(c) 
+    }
+}
+
 let grid = new Map
 let circle = new Circle({x: canvasWidth / 2, y: canvasHeight / 2}, 50)
 
@@ -210,11 +223,13 @@ function generateTreats() {
 }
 generateTreats()
 
+let star = new Star({x: getRandomInt(20, canvasWidth - 20), y: getRandomInt(20, canvasHeight - 20)}, 5, 20, 10)
+
 preDrawingCircle(treats, mines)
 circle.draw(c)
 postDrawingCircle(treats, mines)
 
-let star = new Star({x: getRandomInt(20, canvasWidth - 20), y: getRandomInt(20, canvasHeight - 20)}, 5, 20, 10)
+
 
 const gameStateInst = new GameState(false, false)
 
@@ -230,9 +245,7 @@ function redrawCanvas() {
         treat.draw(c)
     }
     circle.draw(c)
-    if (treats.length === 0 ) {
-        star.draw(c)
-    }
+    checkIfDrawStar(treats, star)
 }
 
 function displayWinMessage() {
@@ -304,6 +317,7 @@ function updateGridCoordinates(entity) {
 function preDrawingCircle(treats, mines) {
     c.reset()
     drawAxis()
+    handleTreatsCollision(circle, treats)
     for (let treat of treats) {
         treat.draw(c)
     }
@@ -313,8 +327,8 @@ function preDrawingCircle(treats, mines) {
 }
 
 function postDrawingCircle(treats, mines) {
-    circle.checkOverlapWithObjCenter(treats)
     circle.checkOverlapWithCircle(mines)
+    checkIfDrawStar(treats, star)
     if (treats.length === 0) {
         circle.checkOverlapWithStar()
     }
@@ -346,7 +360,6 @@ window.addEventListener('keydown', function(event) {
 
     if (event.code == 'Enter') {
         if (gameStateInst.win || gameStateInst.loss) {
-            console.log('enter pressed')
             resetGame(c)
         }
     }
@@ -355,8 +368,8 @@ window.addEventListener('keydown', function(event) {
 function resetGame(c) {
     treats.length = 0
     mines.length = 0
-    circle.center.x = 500
-    circle.center.y = 375
+    circle.center.x = canvasWidth/2
+    circle.center.y = canvasHeight/2
     circle.radius = 50
     generateMines()
     generateTreats()
@@ -371,13 +384,13 @@ function resetGame(c) {
 
 function drawAxis() {
     c.beginPath()
-    c.moveTo(500, 0)
-    c.lineTo(500, 750)
+    c.moveTo(canvasWidth/2, 0)
+    c.lineTo(canvasWidth/2, canvasHeight)
     c.stroke()
 
     c.beginPath()
-    c.moveTo(0, 375)
-    c.lineTo(1000, 375)
+    c.moveTo(0, canvasHeight/2)
+    c.lineTo(canvasWidth, canvasHeight/2)
     c.stroke()
 }
 
