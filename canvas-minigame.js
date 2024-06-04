@@ -24,7 +24,7 @@ class Circle {
         this.radius = radius
     }
 
-    drawCircle() {
+    draw(c) {
         c.beginPath()
         c.arc(this.center.x, this.center.y, this.radius, 0, 2 * Math.PI)
         c.closePath()
@@ -45,11 +45,11 @@ class Circle {
                 }
                 redrawCanvas()
                 for (let shape of shapes) 
-                    shape.draw()
+                    shape.draw(c)
             }
         }
         if (shapes.length === 0) {
-            star.draw() 
+            star.draw(c) 
         }
     }
 
@@ -75,7 +75,7 @@ class Circle {
                 }
                 redrawCanvas()
                 for (let circle of circles) {
-                    circle.draw()
+                    circle.draw(c)
                 }
             }
         }
@@ -103,7 +103,7 @@ class Treat {
         }
     }
 
-    draw() {
+    draw(c) {
         c.fillStyle = 'orange'
         c.fillRect(this.topLeft.x, this.topLeft.y, this.size.width, this.size.height)
     }
@@ -118,7 +118,7 @@ class Mine {
         this.arm = arm
     }
 
-    draw() {
+    draw(c) {
         c.beginPath()
         c.arc(this.center.x, this.center.y, this.radius, 0, 2 * Math.PI)
         c.fillStyle = '#800020'
@@ -157,8 +157,8 @@ class Star {
         this.innerRadius = innerRadius
     }
 
-    draw(){
-        drawStar(this.center, this.numSpikes, this.outerRadius, this.innerRadius)
+    draw(c){
+        drawStar(this.center, this.numSpikes, this.outerRadius, this.innerRadius, c)
     }
 }
 
@@ -211,7 +211,7 @@ function generateTreats() {
 generateTreats()
 
 preDrawingCircle(treats, mines)
-circle.drawCircle()
+circle.draw(c)
 postDrawingCircle(treats, mines)
 
 let star = new Star({x: getRandomInt(20, canvasWidth - 20), y: getRandomInt(20, canvasHeight - 20)}, 5, 20, 10)
@@ -224,14 +224,14 @@ function redrawCanvas() {
     c.reset()
     drawAxis()
     for (let mine of mines) {
-        mine.draw()
+        mine.draw(c)
     }
     for (let treat of treats) {
-        treat.draw()
+        treat.draw(c)
     }
-    circle.drawCircle()
+    circle.draw(c)
     if (treats.length === 0 ) {
-        star.draw()
+        star.draw(c)
     }
 }
 
@@ -305,10 +305,10 @@ function preDrawingCircle(treats, mines) {
     c.reset()
     drawAxis()
     for (let treat of treats) {
-        treat.draw()
+        treat.draw(c)
     }
     for (let mine of mines) {
-        mine.draw()
+        mine.draw(c)
     }
 }
 
@@ -341,18 +341,18 @@ window.addEventListener('keydown', function(event) {
         }
     }
     preDrawingCircle(treats, mines)
-    circle.drawCircle()
+    circle.draw(c)
     postDrawingCircle(treats, mines)
 
     if (event.code == 'Enter') {
         if (gameStateInst.win || gameStateInst.loss) {
             console.log('enter pressed')
-            resetGame()
+            resetGame(c)
         }
     }
 })
 
-function resetGame() {
+function resetGame(c) {
     treats.length = 0
     mines.length = 0
     circle.center.x = 500
@@ -362,7 +362,7 @@ function resetGame() {
     generateTreats()
     redrawCanvas()
     preDrawingCircle(treats, mines)
-    circle.drawCircle()
+    circle.draw(c)
     postDrawingCircle(treats, mines)
     gameStateInst.win = false
     gameStateInst.loss = false
@@ -382,7 +382,7 @@ function drawAxis() {
 }
 
 // below is an adaptation of a utility function for drawing starts
-function drawStar(center, spikes, outerRadius, innerRadius) {
+function drawStar(center, spikes, outerRadius, innerRadius, c) {
     let rot = Math.PI/2 * 3
     let x = center.x
     let y = center.y
