@@ -41,17 +41,6 @@ class Circle {
         return false
     }
 
-    checkOverlapWithStar() {
-        let legA = star.center.x - this.center.x
-        let legB = star.center.y - this.center.y
-        if (legA ** 2 + legB ** 2 <= this.radius ** 2) {
-            gameStateInst.win = true
-        }
-        if (gameStateInst.win) {
-            displayWinMessage()
-        }
-    }
-
     checkOverlapWithCircle(circles) {
         for (let i = 0; i < circles.length; i++) {
             let legA = circles[i].center.x - this.center.x
@@ -157,13 +146,23 @@ class GameState {
     }
 }
 
+const gameStateInst = new GameState(false, false)
+
+function checkWinAndDisplayMessage() {
+    if (treats.length === 0) {
+        if (circle.checkOverlapWithShapeCenter(star)) {
+            gameStateInst.win = true
+        }
+        if (gameStateInst.win) {
+            displayWinMessage()
+        }
+    }
+}
+
 function handleTreatsCollision(circle, treats) {
-    // console.log('nom nom nom')
     for (let i = 0; i < treats.length; i++) {
         if (circle.checkOverlapWithShapeCenter(treats[i])) {
-            // console.log('nom nom nom')
             treats.splice(i, 1)
-            // console.log(treats)
             if (circle.radius + circleGrowthAmount <= maxCircleSize) {
                 circle.changeCircleSize(circleGrowthAmount)
             }
@@ -228,10 +227,6 @@ let star = new Star({x: getRandomInt(20, canvasWidth - 20), y: getRandomInt(20, 
 preDrawingCircle(treats, mines)
 circle.draw(c)
 postDrawingCircle(treats, mines)
-
-
-
-const gameStateInst = new GameState(false, false)
 
 
 
@@ -330,8 +325,9 @@ function postDrawingCircle(treats, mines) {
     circle.checkOverlapWithCircle(mines)
     checkIfDrawStar(treats, star)
     if (treats.length === 0) {
-        circle.checkOverlapWithStar()
+        circle.checkOverlapWithShapeCenter(star)
     }
+    checkWinAndDisplayMessage()
 }
 
 
