@@ -41,25 +41,13 @@ class Circle {
         return false
     }
 
-    checkOverlapWithCircle(circles) {
-        for (let i = 0; i < circles.length; i++) {
-            let legA = circles[i].center.x - this.center.x
-            let legB = circles[i].center.y - this.center.y
-            if (legA ** 2 + legB ** 2 <= (this.radius + circles[i].arm) ** 2) {
-                circles.splice(i, 1)
-                if (this.radius -20 >= 10) { 
-                    this.changeCircleSize(-15)
-                }
-                redrawCanvas()
-                for (let circle of circles) {
-                    circle.draw(c)
-                }
-            }
+    checkOverlapWithCircularPerimeter(circularPerimeter) {
+        let legA = circularPerimeter.center.x - this.center.x
+        let legB = circularPerimeter.center.y - this.center.y
+        if (legA ** 2 + legB ** 2 <= (this.radius + circularPerimeter.arm) ** 2) {
+            return true
         }
-        if (circles.length <= 1) {
-            gameStateInst.loss = true
-            displayLossMessage()
-        }
+        return false
     }
 
     changeCircleSize(delta) {
@@ -146,7 +134,7 @@ class GameState {
     }
 }
 
-const gameStateInst = new GameState(false, false)
+let gameStateInst = new GameState(false, false)
 
 function checkWinAndDisplayMessage() {
     if (treats.length === 0) {
@@ -156,6 +144,13 @@ function checkWinAndDisplayMessage() {
         if (gameStateInst.win) {
             displayWinMessage()
         }
+    }
+}
+
+function checkLossAndDisplayMessage() {
+    if (mines.length <= 1) {
+        gameStateInst.loss = true
+        displayLossMessage()
     }
 }
 
@@ -175,6 +170,21 @@ function handleTreatsCollision(circle, treats) {
     }
 }
 
+function handleMinesCollision(circle, mines) {
+    for (let i = 0; i < mines.length; i++) {
+        if (circle.checkOverlapWithCircularPerimeter(mines[i])) {
+            mines.splice(i, 1)
+            if (this.radius - 15 >= 10) { 
+                this.changeCircleSize(-15)
+            }
+            redrawCanvas()
+            for (let mine of mines) {
+                mine.draw(c)
+            }
+        }
+    }
+}
+
 function checkIfDrawStar(treats, star) {
     if (treats.length === 0) {
         star.draw(c) 
@@ -186,25 +196,10 @@ let circle = new Circle({x: canvasWidth / 2, y: canvasHeight / 2}, 50)
 
 let mines = []
 
-function randomiseCanvasHalf(margin, canvasXY, circleRadius) {
-    if (getRandomInt(0, 2) === 0) {
-        return getRandomInt(margin, canvasXY/2 - circleRadius)
-    } else {
-        return getRandomInt(canvasXY/2 + circleRadius, canvasXY - margin)
-    }
-}
-
-function randomiseGridCanvasHalf(canvasXY, gridSize, circleRadius) {
-    if (getRandomInt(0, 2) === 0) {
-        return getRandomInt(0, canvasXY/gridSize/2 - circleRadius/gridSize) * gridSize + gridSize/2
-    } else {
-        return getRandomInt(canvasXY/gridSize/2 + circleRadius/gridSize, canvasXY/gridSize) * gridSize + gridSize/2
-    }
-}
 
 function generateMines() {
     for (let i = 0; i < 4; i++) {
-        let mine = new Mine({x: randomiseCanvasHalf(17.5, canvasWidth, circle.radius), y: randomiseCanvasHalf(17.5, canvasHeight, circle.radius)}, 7.5, 12.5)
+        let mine = new Mine({x: getRandomInt(0, canvasWidth), y: getRandomInt(0, canvasHeight)}, 7.5, 12.5)
         updateGridCoordinates(mine)
         mines.push(mine)
     }
@@ -215,7 +210,7 @@ generateMines()
 let treats = []
 function generateTreats() {
     for (let i = 0; i < 10; i++) {
-        let treat = new Treat({x: randomiseGridCanvasHalf(canvasWidth, gridSize, circle.radius), y: randomiseGridCanvasHalf(canvasHeight, gridSize, circle.radius)})
+        let treat = new Treat({x: getRandomInt(0, canvasWidth), y: getRandomInt(0, canvasHeight)})
         updateGridCoordinates(treat)
         treats.push(treat)
     }
@@ -269,25 +264,24 @@ function getGridString(pxCoordinates) {
     return `${ gridX }, ${ gridY}`
 }
 
-function updateGridCoordinates(entity) {
-    let gridString = getGridString(entity.center)
-    while (grid.has(gridString)) {
-        if (entity instanceof Treat) {
-            entity.center.x = getRandomInt(0, canvasWidth - gridSize) + gridSize/2
-            entity.center.y = getRandomInt(0, canvasHeight - gridSize) + gridSize/2
-        } else if (entity instanceof Mine) {
-            entity.center.x = getRandomInt(entity.arm, canvasWidth - entity.arm)
-            entity.center.y = getRandomInt(entity.arm, canvasHeight - entity.arm)
-        } else if (entity instanceof Star) {
-            entity.center.x = getRandomInt(entity.outerRadius, canvasWidth - entity.outerRadius)
-            entity.center.y = getRandomInt(entity.outerRadius, canvasHeight - entity.outerRadius)
-        } else {
-            entity.center.x = getRandomInt(entity.radius, canvasWidth - entity.radius)
-            entity.center.y = getRandomInt(entity.radius, canvasHeight - entity.radius)
+// TODO: update topLeft in updateGridCoordinates() when you move an entity (fixes treats not appearing)
+// TODO: reset grid when reset game (fixes eventual crashing)
+// TODO: set circle as occupying central grid squares and delete randomiseCanvasHalf function
+//
+
+
+function addCircleCoordinatesToGridMap(circle) {
+    for (let x = circle.center.x - circle.radius; x < circle.center.x + circle.radius; x += gridSize) {
+        for (let y = circle.center.y - circle.radius; y < circle.center.y + circle.radius; y += gridSize) {
+            let gridString = getGridString
+            grid.set(gridString, 'Circle')
         }
-        gridString = getGridString(entity.center)
     }
-    
+}
+
+function updateGridCoordinates(entity) {
+    addCircleCoordinatesToGridMap(circle)
+
     let entityType = null
     if (entity instanceof Treat) {
         entityType = 'Treat'
@@ -299,20 +293,35 @@ function updateGridCoordinates(entity) {
         entityType = 'Circle'
     }
 
-    if (!grid.has(gridString)) {
-        // if (!(entity instanceof Treat)) {
-            grid.set(gridString, entityType)
-            entity.center.x = Math.floor(entity.center.x / gridSize) * gridSize + (gridSize / 2)
-            entity.center.y = Math.floor(entity.center.y / gridSize) * gridSize + (gridSize / 2)
-        // }
+    let gridString = getGridString(entity.center)
+    while (grid.has(gridString)) {
+        entity.center.x = getRandomInt(0, canvasWidth - gridSize) + gridSize/2
+        entity.center.y = getRandomInt(0, canvasHeight - gridSize) + gridSize/2
+        if (entityType === 'Treat') {
+            entity.topLeft.x = entity.center.x - (entity.size.width/2)
+            entity.topLeft.y = entity.center.y - (entity.size.height/2)
+        }
+        gridString = getGridString(entity.center)
+    }
+    
+
+
+    grid.set(gridString, entityType)
+    entity.center.x = Math.floor(entity.center.x / gridSize) * gridSize + (gridSize / 2)
+    entity.center.y = Math.floor(entity.center.y / gridSize) * gridSize + (gridSize / 2)
+    if (entityType === 'Treat') {
+        entity.topLeft.x = entity.center.x - (entity.size.width/2)
+        entity.topLeft.y = entity.center.y - (entity.size.height/2)
     }
 }
+
 
 
 function preDrawingCircle(treats, mines) {
     c.reset()
     drawAxis()
     handleTreatsCollision(circle, treats)
+    handleMinesCollision(circle, mines)
     for (let treat of treats) {
         treat.draw(c)
     }
@@ -321,13 +330,13 @@ function preDrawingCircle(treats, mines) {
     }
 }
 
-function postDrawingCircle(treats, mines) {
-    circle.checkOverlapWithCircle(mines)
+function postDrawingCircle(treats) {
     checkIfDrawStar(treats, star)
     if (treats.length === 0) {
         circle.checkOverlapWithShapeCenter(star)
     }
     checkWinAndDisplayMessage()
+    checkLossAndDisplayMessage()
 }
 
 
@@ -362,19 +371,17 @@ window.addEventListener('keydown', function(event) {
 })
 
 function resetGame(c) {
-    treats.length = 0
-    mines.length = 0
-    circle.center.x = canvasWidth/2
-    circle.center.y = canvasHeight/2
-    circle.radius = 50
+    treats = []
+    mines = []
+    circle = new Circle({x: canvasWidth / 2, y: canvasHeight / 2}, 50)
+    grid = new Map
     generateMines()
     generateTreats()
     redrawCanvas()
     preDrawingCircle(treats, mines)
     circle.draw(c)
     postDrawingCircle(treats, mines)
-    gameStateInst.win = false
-    gameStateInst.loss = false
+    gameStateInst = new GameState(false, false)
 }
 
 
