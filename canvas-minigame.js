@@ -9,6 +9,8 @@ const gridSize = 25
 const circleGrowthAmount = 7.5
 const maxCircleSize = 150
 
+const circleShrinkageAmount = 15
+
 // min is inclusive, max is exclusive
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min)) + min
@@ -44,7 +46,7 @@ class Circle {
     checkOverlapWithCircularPerimeter(circularPerimeter) {
         let legA = circularPerimeter.center.x - this.center.x
         let legB = circularPerimeter.center.y - this.center.y
-        if (legA ** 2 + legB ** 2 <= (this.radius + circularPerimeter.arm) ** 2) {
+        if (legA ** 2 + legB ** 2 <= (this.radius + circularPerimeter.outerRadius) ** 2) {
             return true
         }
         return false
@@ -77,10 +79,10 @@ class Treat {
 
 
 class Mine {
-    constructor(center, radius, arm) {
+    constructor(center, radius, outerRadius) {
         this.center = { ...center }
         this.radius = radius
-        this.arm = arm
+        this.outerRadius = outerRadius
     }
 
     draw(c) {
@@ -92,16 +94,16 @@ class Mine {
         c.strokeStyle = '#800020'
         c.lineWidth = 2
         
-        c.moveTo(this.center.x - this.arm, this.center.y)
-        c.lineTo(this.center.x + this.arm, this.center.y)
+        c.moveTo(this.center.x - this.outerRadius, this.center.y)
+        c.lineTo(this.center.x + this.outerRadius, this.center.y)
         c.stroke()
         
-        c.moveTo(this.center.x, this.center.y - this.arm)
-        c.lineTo(this.center.x, this.center.y + this.arm)
+        c.moveTo(this.center.x, this.center.y - this.outerRadius)
+        c.lineTo(this.center.x, this.center.y + this.outerRadius)
         c.stroke()
         
-        let obliqueX = Math.cos(degreesToRadians(45)) * this.arm
-        let obliqueY = Math.sin(degreesToRadians(45)) * this.arm
+        let obliqueX = Math.cos(degreesToRadians(45)) * this.outerRadius
+        let obliqueY = Math.sin(degreesToRadians(45)) * this.outerRadius
         
         c.moveTo(this.center.x + obliqueX, this.center.y - obliqueY)
         c.lineTo(this.center.x - obliqueX, this.center.y + obliqueY)
@@ -174,8 +176,8 @@ function handleMinesCollision(circle, mines) {
     for (let i = 0; i < mines.length; i++) {
         if (circle.checkOverlapWithCircularPerimeter(mines[i])) {
             mines.splice(i, 1)
-            if (this.radius - 15 >= 10) { 
-                this.changeCircleSize(-15)
+            if (circle.radius - circleShrinkageAmount >= 10) { 
+                circle.changeCircleSize(-circleShrinkageAmount)
             }
             redrawCanvas()
             for (let mine of mines) {
