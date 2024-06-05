@@ -200,7 +200,7 @@ let mines = []
 function generateMines() {
     for (let i = 0; i < 4; i++) {
         let mine = new Mine({x: getRandomInt(0, canvasWidth), y: getRandomInt(0, canvasHeight)}, 7.5, 12.5)
-        updateGridCoordinates(mine)
+        ensureEntityIsInEmptyGridSquare(mine)
         mines.push(mine)
     }
 }
@@ -211,18 +211,23 @@ let treats = []
 function generateTreats() {
     for (let i = 0; i < 10; i++) {
         let treat = new Treat({x: getRandomInt(0, canvasWidth), y: getRandomInt(0, canvasHeight)})
-        updateGridCoordinates(treat)
+        ensureEntityIsInEmptyGridSquare(treat)
         treats.push(treat)
     }
 }
 generateTreats()
 
 let star = new Star({x: getRandomInt(20, canvasWidth - 20), y: getRandomInt(20, canvasHeight - 20)}, 5, 20, 10)
+ensureEntityIsInEmptyGridSquare(star)
 
-preDrawingCircle(treats, mines)
-circle.draw(c)
-postDrawingCircle(treats, mines)
 
+function tick() {
+    preDrawingCircle(treats, mines)
+    circle.draw(c)
+    postDrawingCircle(treats, mines)
+}
+
+tick()
 
 
 function redrawCanvas() {
@@ -264,22 +269,21 @@ function getGridString(pxCoordinates) {
     return `${ gridX }, ${ gridY}`
 }
 
-// TODO: update topLeft in updateGridCoordinates() when you move an entity (fixes treats not appearing)
-// TODO: reset grid when reset game (fixes eventual crashing)
-// TODO: set circle as occupying central grid squares and delete randomiseCanvasHalf function
-//
-
 
 function addCircleCoordinatesToGridMap(circle) {
     for (let x = circle.center.x - circle.radius; x < circle.center.x + circle.radius; x += gridSize) {
         for (let y = circle.center.y - circle.radius; y < circle.center.y + circle.radius; y += gridSize) {
-            let gridString = getGridString
+            let coordinates = {
+                x: x,
+                y: y
+            }
+            let gridString = getGridString(coordinates)
             grid.set(gridString, 'Circle')
         }
     }
 }
 
-function updateGridCoordinates(entity) {
+function ensureEntityIsInEmptyGridSquare(entity) {
     addCircleCoordinatesToGridMap(circle)
 
     let entityType = null
@@ -303,8 +307,6 @@ function updateGridCoordinates(entity) {
         }
         gridString = getGridString(entity.center)
     }
-    
-
 
     grid.set(gridString, entityType)
     entity.center.x = Math.floor(entity.center.x / gridSize) * gridSize + (gridSize / 2)
@@ -359,9 +361,7 @@ window.addEventListener('keydown', function(event) {
             circle.center.y -= stepDistance
         }
     }
-    preDrawingCircle(treats, mines)
-    circle.draw(c)
-    postDrawingCircle(treats, mines)
+    tick()
 
     if (event.code == 'Enter') {
         if (gameStateInst.win || gameStateInst.loss) {
@@ -378,9 +378,7 @@ function resetGame(c) {
     generateMines()
     generateTreats()
     redrawCanvas()
-    preDrawingCircle(treats, mines)
-    circle.draw(c)
-    postDrawingCircle(treats, mines)
+    tick()
     gameStateInst = new GameState(false, false)
 }
 
