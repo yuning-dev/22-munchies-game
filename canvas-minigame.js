@@ -8,7 +8,6 @@ const gridSize = 25
 
 const circleGrowthAmount = 7.5
 const maxCircleSize = 150
-
 const circleShrinkageAmount = 15
 
 // min is inclusive, max is exclusive
@@ -43,10 +42,10 @@ class Circle {
         return false
     }
 
-    checkOverlapWithCircularPerimeter(circularPerimeter) {
-        let legA = circularPerimeter.center.x - this.center.x
-        let legB = circularPerimeter.center.y - this.center.y
-        if (legA ** 2 + legB ** 2 <= (this.radius + circularPerimeter.outerRadius) ** 2) {
+    checkOverlapWithMine(mine) {
+        let legA = mine.center.x - this.center.x
+        let legB = mine.center.y - this.center.y
+        if (legA ** 2 + legB ** 2 <= (this.radius + mine.outerRadius) ** 2) {
             return true
         }
         return false
@@ -64,7 +63,10 @@ class Treat {
             width: 15,
             height: 15
         }
-        this.topLeft =  {
+    }
+
+    get topLeft() {
+        return {
             x: this.center.x - (this.size.width / 2),
             y: this.center.y - (this.size.height / 2)
         }
@@ -174,7 +176,7 @@ function handleTreatsCollision(circle, treats) {
 
 function handleMinesCollision(circle, mines) {
     for (let i = 0; i < mines.length; i++) {
-        if (circle.checkOverlapWithCircularPerimeter(mines[i])) {
+        if (circle.checkOverlapWithMine(mines[i])) {
             mines.splice(i, 1)
             if (circle.radius - circleShrinkageAmount >= 10) { 
                 circle.changeCircleSize(-circleShrinkageAmount)
@@ -193,11 +195,12 @@ function checkIfDrawStar(treats, star) {
     }
 }
 
-let grid = new Map
+let grid = new Map()
 let circle = new Circle({x: canvasWidth / 2, y: canvasHeight / 2}, 50)
 
 let mines = []
 
+addCircleCoordinatesToGridMap(circle)
 
 function generateMines() {
     for (let i = 0; i < 4; i++) {
@@ -223,27 +226,7 @@ let star = new Star({x: getRandomInt(20, canvasWidth - 20), y: getRandomInt(20, 
 ensureEntityIsInEmptyGridSquare(star)
 
 
-function tick() {
-    preDrawingCircle(treats, mines)
-    circle.draw(c)
-    postDrawingCircle(treats, mines)
-}
 
-tick()
-
-
-function redrawCanvas() {
-    c.reset()
-    drawAxis()
-    for (let mine of mines) {
-        mine.draw(c)
-    }
-    for (let treat of treats) {
-        treat.draw(c)
-    }
-    circle.draw(c)
-    checkIfDrawStar(treats, star)
-}
 
 function displayWinMessage() {
     c.reset()
@@ -275,73 +258,30 @@ function getGridString(pxCoordinates) {
 function addCircleCoordinatesToGridMap(circle) {
     for (let x = circle.center.x - circle.radius; x < circle.center.x + circle.radius; x += gridSize) {
         for (let y = circle.center.y - circle.radius; y < circle.center.y + circle.radius; y += gridSize) {
-            let coordinates = {
-                x: x,
-                y: y
-            }
-            let gridString = getGridString(coordinates)
+            const gridString = getGridString({ x, y })
             grid.set(gridString, 'Circle')
         }
     }
 }
 
 function ensureEntityIsInEmptyGridSquare(entity) {
-    addCircleCoordinatesToGridMap(circle)
 
     let entityType = null
-    if (entity instanceof Treat) {
-        entityType = 'Treat'
-    } else if (entity instanceof Mine) {
-        entityType = 'Mine'
-    } else if (entity instanceof Star) {
-        entityType = 'Star'
-    } else {
-        entityType = 'Circle'
-    }
+    entityType = entity?.constructor.name
 
     let gridString = getGridString(entity.center)
     while (grid.has(gridString)) {
         entity.center.x = getRandomInt(0, canvasWidth - gridSize) + gridSize/2
         entity.center.y = getRandomInt(0, canvasHeight - gridSize) + gridSize/2
-        if (entityType === 'Treat') {
-            entity.topLeft.x = entity.center.x - (entity.size.width/2)
-            entity.topLeft.y = entity.center.y - (entity.size.height/2)
-        }
         gridString = getGridString(entity.center)
     }
 
     grid.set(gridString, entityType)
     entity.center.x = Math.floor(entity.center.x / gridSize) * gridSize + (gridSize / 2)
     entity.center.y = Math.floor(entity.center.y / gridSize) * gridSize + (gridSize / 2)
-    if (entityType === 'Treat') {
-        entity.topLeft.x = entity.center.x - (entity.size.width/2)
-        entity.topLeft.y = entity.center.y - (entity.size.height/2)
-    }
 }
 
 
-
-function preDrawingCircle(treats, mines) {
-    c.reset()
-    drawAxis()
-    handleTreatsCollision(circle, treats)
-    handleMinesCollision(circle, mines)
-    for (let treat of treats) {
-        treat.draw(c)
-    }
-    for (let mine of mines) {
-        mine.draw(c)
-    }
-}
-
-function postDrawingCircle(treats) {
-    checkIfDrawStar(treats, star)
-    if (treats.length === 0) {
-        circle.checkOverlapWithShapeCenter(star)
-    }
-    checkWinAndDisplayMessage()
-    checkLossAndDisplayMessage()
-}
 
 
 window.addEventListener('keydown', function(event) {
@@ -372,14 +312,43 @@ window.addEventListener('keydown', function(event) {
     }
 })
 
+function tick() {
+    updateState()
+    redrawCanvas()
+}
+
+tick()
+
+function updateState() {   //to be called each time the circle moves 
+    handleTreatsCollision(circle, treats)
+    handleMinesCollision(circle, mines)
+}
+
+function redrawCanvas() {
+    c.reset()
+    drawAxis()
+    for (let mine of mines) {
+        mine.draw(c)
+    }
+    for (let treat of treats) {
+        treat.draw(c)
+    }
+    circle.draw(c)
+    checkIfDrawStar(treats, star)
+    if (treats.length === 0) {
+        circle.checkOverlapWithShapeCenter(star)
+    }
+    checkWinAndDisplayMessage()
+    checkLossAndDisplayMessage()
+}
+
 function resetGame(c) {
     treats = []
     mines = []
     circle = new Circle({x: canvasWidth / 2, y: canvasHeight / 2}, 50)
-    grid = new Map
+    grid = new Map()
     generateMines()
     generateTreats()
-    redrawCanvas()
     tick()
     gameStateInst = new GameState(false, false)
 }
