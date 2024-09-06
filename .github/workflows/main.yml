@@ -20,4 +20,4 @@ jobs:
         aws-region: eu-west-2
 
     - name: Deploy minigame to S3 bucket for static hosting
-      run: aws s3 sync ./ s3://munchies-game --delete --exclude="*" --include="canvas.html" --include="canvas.css" --include="canvas-minigame.js"
+      run: aws s3 sync ./public/ s3://munchies-game --delete --exclude="*" --include="canvas.html" --include="canvas.css" --include="canvas-minigame.js"
