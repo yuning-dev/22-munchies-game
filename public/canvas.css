@@ -3,7 +3,7 @@
 }
 
 .orangeText {
-    color: orange;
+    color: rgb(255, 128, 0);
 }
 
 .brownText {
@@ -15,6 +15,16 @@
     margin-bottom: 30px;
     text-align: center;
     color: blueviolet;
+}
+
+#introWrapper {
+    border: 1.5px solid black;
+    border-radius: 5px;
+    width: 1000px;
+    margin: 0 auto 10px auto;
+    padding-top: 10px;
+    padding-left: 10px;
+    background: rgb(239, 239, 239);
 }
 
 #intro {
@@ -35,7 +45,7 @@
 }
 
 #counterSubwrapper {
-    margin-right: 20px;
+    margin-right: 10px;
     margin-bottom: 5px;
     display: flex;
     flex-direction: column;
