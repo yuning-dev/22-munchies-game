@@ -10,11 +10,31 @@ const circleGrowthAmount = 7.5
 const maxCircleSize = 150
 const circleShrinkageAmount = 15
 
+//Setting up counters
 let treatsCounter = 0
 document.getElementById('points').innerHTML = treatsCounter
 let lives = 3
 document.getElementById('lives').innerHTML = lives
 
+//Setting up time counter
+const minutesEl = document.getElementById('minutes')
+const secondsEl = document.getElementById('seconds')
+let totalSeconds = 0
+setInterval(setTime, 1000)
+
+function setTime() {
+    ++totalSeconds
+    secondsEl.innerHTML = pad(totalSeconds % 60)
+    minutesEl.innerHTML = pad(parseInt(totalSeconds / 60))
+}
+
+function pad(val) {
+    const valString = val + ""
+    if (valString.length < 2) {
+        return "0" + valString
+    }
+    return valString
+}
 
 
 // min is inclusive, max is exclusive
