@@ -10,15 +10,25 @@ const circleGrowthAmount = 7.5
 const maxCircleSize = 150
 const circleShrinkageAmount = 15
 
+let numAttempts = 0
+
 const startBtn = document.getElementById('startBtn')
 startBtn.addEventListener('click', function() {
-    startTimer()
-    redrawCanvas()
+    if (numAttempts === 0) {
+        startTimer()
+        resetGame()
+        numAttempts++
+    } else {
+        clearTimer()
+        startTimer()
+        resetGame()
+        numAttempts++
+    }
 })
 
 // Setting up points and lives counters
-let treatsCounter = 0
-document.getElementById('points').innerHTML = treatsCounter
+let points = 0
+document.getElementById('points').innerHTML = points
 let lives = 3
 document.getElementById('lives').innerHTML = lives
 
@@ -29,9 +39,18 @@ const secondsEl = document.getElementById('seconds')
 minutesEl.innerHTML = '00'
 secondsEl.innerHTML = '00'
 let totalSeconds = 0
+let intervalId
 
 function startTimer() {
-    setInterval(setTime, 1000)
+    minutesEl.innerHTML = '00'
+    secondsEl.innerHTML = '00'
+    totalSeconds = 0
+    intervalId = setInterval(setTime, 1000)
+}
+
+function clearTimer() {
+    clearInterval(intervalId)
+    intervalId = null
 }
 
 function setTime() {
@@ -210,8 +229,8 @@ function handleTreatsCollision(circle, treats) {
     for (let i = 0; i < treats.length; i++) {
         if (circle.checkOverlapWithShapeCenter(treats[i])) {
             treats.splice(i, 1)
-            treatsCounter++
-            document.getElementById('points').innerHTML = treatsCounter
+            points++
+            document.getElementById('points').innerHTML = points
             if (circle.radius + circleGrowthAmount <= maxCircleSize) {
                 circle.changeCircleSize(circleGrowthAmount)
             }
@@ -380,7 +399,7 @@ function updateState() {   //to be called each time the circle moves
 
 function redrawCanvas() {
     c.reset()
-    drawAxis()
+    // drawAxis()
     for (let mine of mines) {
         mine.draw(c)
     }
@@ -412,17 +431,17 @@ function resetGame(c) {
 }
 
 
-function drawAxis() {
-    c.beginPath()
-    c.moveTo(canvasWidth/2, 0)
-    c.lineTo(canvasWidth/2, canvasHeight)
-    c.stroke()
+// function drawAxis() {
+//     c.beginPath()
+//     c.moveTo(canvasWidth/2, 0)
+//     c.lineTo(canvasWidth/2, canvasHeight)
+//     c.stroke()
 
-    c.beginPath()
-    c.moveTo(0, canvasHeight/2)
-    c.lineTo(canvasWidth, canvasHeight/2)
-    c.stroke()
-}
+//     c.beginPath()
+//     c.moveTo(0, canvasHeight/2)
+//     c.lineTo(canvasWidth, canvasHeight/2)
+//     c.stroke()
+// }
 
 // below is an adaptation of a utility function for drawing starts
 function drawStar(center, spikes, outerRadius, innerRadius, c) {
