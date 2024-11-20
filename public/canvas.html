@@ -9,6 +9,27 @@
 
 <body>
     <h1 id="title">The munchies minigame</h1>
+    <div id="introWrapper">
+        <div id="intro">
+            Use the arrow keys to get <span class="orangeText">treats</span> without hitting <span class="brownText">mines</span>! Score higher by getting all treats as quickly as possible :)
+        </div>
+        <div id="intro">
+            Ready? Click the Start game button to begin! <button id="startBtn">Start game</button>
+        </div>
+    </div>
+    <div id="countersWrapper">
+        <div id="timeCounterWrapper">
+            Time: <span id="minutes"></span>:<span id="seconds"></span>
+        </div>
+        <div id="counterSubwrapper">
+            <div id="pointsWrapper">
+                Points: <span id="points"></span>
+            </div>
+            <div id="livesWrapper">
+                Lives: <span id="lives"></span>
+            </div>
+        </div>
+    </div>
     <canvas id="mainCanvas" width="1000" height="750"></canvas>
 
     <script src="./canvas-minigame.js"></script>

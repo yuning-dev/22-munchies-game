@@ -1,9 +1,76 @@
-h1 {
-    margin-top: 50px;
-    margin-bottom: 50px;
+* {
+    font-family:cursive;
+}
+
+.orangeText {
+    color: rgb(255, 128, 0);
+}
+
+.brownText {
+    color: brown;
+}
+
+#title {
+    margin-top: 40px;
+    margin-bottom: 30px;
     text-align: center;
     color: blueviolet;
-    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+#introWrapper {
+    border: 1.5px solid black;
+    border-radius: 5px;
+    width: 1000px;
+    margin: 0 auto 10px auto;
+    padding-top: 10px;
+    padding-left: 10px;
+    background: rgb(239, 239, 239);
+}
+
+#intro {
+    width: 1000px;
+    margin: 0 auto 10px auto;
+}
+
+#countersWrapper {
+    margin-left: auto;
+    margin-right: auto;
+    width: 1000px;
+    display: flex;
+    justify-content: space-between;
+}
+
+#timeCounterWrapper {
+    margin-top: 20px;
+}
+
+#counterSubwrapper {
+    margin-right: 10px;
+    margin-bottom: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    text-align: right;
+}
+
+#startBtn {
+    margin-left: 10px;
+    padding: 3px 5px;
+    background: rgb(154, 235, 248);
+    border-radius: 3px;
+}
+
+#startBtn:hover {
+    cursor: pointer;
+    background: rgb(107, 223, 240);
+}
+
+#points {
+    color: green;
+}
+
+#lives {
+    color: brown;
 }
 
 canvas {

@@ -10,8 +10,71 @@ const circleGrowthAmount = 7.5
 const maxCircleSize = 150
 const circleShrinkageAmount = 15
 
-// min is inclusive, max is exclusive
+let numAttempts = 0
+
+// For calculating points multiplier
+const firstCutoffTime = 5
+const secondCutoffTime = 10
+
+const startBtn = document.getElementById('startBtn')
+startBtn.addEventListener('click', function() {
+    if (numAttempts === 0) {
+        startTimer()
+        resetGame()
+        numAttempts++
+    } else {
+        clearTimer()
+        startTimer()
+        resetGame()
+        numAttempts++
+    }
+})
+
+// Setting up points and lives counters
+let points = 0
+document.getElementById('points').innerHTML = points
+let lives = 3
+document.getElementById('lives').innerHTML = lives
+
+
+// Setting up time counter
+const minutesEl = document.getElementById('minutes')
+const secondsEl = document.getElementById('seconds')
+minutesEl.innerHTML = '00'
+secondsEl.innerHTML = '00'
+let totalSeconds = 0
+let intervalId
+
+function startTimer() {
+    minutesEl.innerHTML = '00'
+    secondsEl.innerHTML = '00'
+    totalSeconds = 0
+    intervalId = setInterval(setTime, 1000)
+}
+
+function clearTimer() {
+    clearInterval(intervalId)
+    intervalId = null
+}
+
+function setTime() {
+    ++totalSeconds
+    secondsEl.innerHTML = pad(totalSeconds % 60)
+    minutesEl.innerHTML = pad(parseInt(totalSeconds / 60))
+}
+
+function pad(val) {
+    const valString = val + ""
+    if (valString.length < 2) {
+        return "0" + valString
+    }
+    return valString
+}
+
+
+// Below are utility functions
 function getRandomInt(min, max) {
+    // min is inclusive, max is exclusive
     return Math.floor(Math.random() * (max - min)) + min
 }
 
@@ -19,6 +82,7 @@ function degreesToRadians(degrees) {
     return degrees * Math.PI / 180
 }
 
+// These are the entities featured in the game: circle, treat, mine, star and game state
 class Circle {
     constructor(center, radius) {
         this.center = { ...center }
@@ -74,6 +138,29 @@ class Treat {
 
     draw(c) {
         c.fillStyle = 'orange'
+        c.fillRect(this.topLeft.x, this.topLeft.y, this.size.width, this.size.height)
+    }
+
+}
+
+class BigTreat {
+    constructor(center) {
+        this.center = { ...center }
+        this.size = {
+            width: 20,
+            height: 20
+        }
+    }
+
+    get topLeft() {
+        return {
+            x: this.center.x - (this.size.width / 2),
+            y: this.center.y - (this.size.height / 2)
+        }
+    }
+
+    draw(c) {
+        c.fillStyle = '#F88379'
         c.fillRect(this.topLeft.x, this.topLeft.y, this.size.width, this.size.height)
     }
 
@@ -140,13 +227,21 @@ class GameState {
 
 let gameStateInst = new GameState(false, false)
 
+function initialState() {
+    c.reset()
+    c.font = '35px calibri'
+    c.fillStyle = 'lightblue'
+    c.fillText('Click the Start game button above to begin!', 205, 335)
+}
+
 function checkWinAndDisplayMessage() {
-    if (treats.length === 0) {
+    if (treats.length === 0 && bigTreats.length === 0) {
         if (circle.checkOverlapWithShapeCenter(star)) {
             gameStateInst.win = true
         }
         if (gameStateInst.win) {
             displayWinMessage()
+            clearTimer()
         }
     }
 }
@@ -155,6 +250,17 @@ function checkLossAndDisplayMessage() {
     if (mines.length <= 1) {
         gameStateInst.loss = true
         displayLossMessage()
+        clearTimer()
+    }
+}
+
+function pointsMultiplier() {
+    if (minutesEl.innerHTML === '00' & Number(secondsEl.innerHTML) < firstCutoffTime) {
+        return 3
+    } else if (minutesEl.innerHTML === '00' & Number(secondsEl.innerHTML) < secondCutoffTime) {
+        return 2
+    } else {
+        return 1
     }
 }
 
@@ -162,6 +268,8 @@ function handleTreatsCollision(circle, treats) {
     for (let i = 0; i < treats.length; i++) {
         if (circle.checkOverlapWithShapeCenter(treats[i])) {
             treats.splice(i, 1)
+            points += pointsMultiplier() * 1
+            document.getElementById('points').innerHTML = points
             if (circle.radius + circleGrowthAmount <= maxCircleSize) {
                 circle.changeCircleSize(circleGrowthAmount)
             }
@@ -169,15 +277,38 @@ function handleTreatsCollision(circle, treats) {
             for (let treat of treats) {
                 treat.draw(c)
             }
-            checkIfDrawStar(treats, star)
+            checkIfDrawStar(treats, bigTreats, star)
         }
     }
+}
+
+function handleBigTreatsCollision(circle, bigTreats) {
+    for (let i = 0; i < bigTreats.length; i++) {
+        if (circle.checkOverlapWithShapeCenter(bigTreats[i])) {
+            bigTreats.splice(i, 1)
+            points += pointsMultiplier() * 3
+            document.getElementById('points').innerHTML = points
+            if (circle.radius + circleGrowthAmount <= maxCircleSize) {
+                circle.changeCircleSize(circleGrowthAmount)
+            }
+            redrawCanvas()
+            for (let bigTreat of bigTreats) {
+                bigTreat.draw(c)
+            }
+            checkIfDrawStar(treats, bigTreats, star)
+        }
+    }
+
 }
 
 function handleMinesCollision(circle, mines) {
     for (let i = 0; i < mines.length; i++) {
         if (circle.checkOverlapWithMine(mines[i])) {
             mines.splice(i, 1)
+            lives--
+            document.getElementById('lives').innerHTML = lives
+            points -= pointsMultiplier() * 2
+            document.getElementById('points').innerHTML = points
             if (circle.radius - circleShrinkageAmount >= 10) { 
                 circle.changeCircleSize(-circleShrinkageAmount)
             }
@@ -189,8 +320,8 @@ function handleMinesCollision(circle, mines) {
     }
 }
 
-function checkIfDrawStar(treats, star) {
-    if (treats.length === 0) {
+function checkIfDrawStar(treats, bigTreats, star) {
+    if (treats.length === 0 && bigTreats.length === 0) {
         star.draw(c) 
     }
 }
@@ -222,10 +353,20 @@ function generateTreats() {
 }
 generateTreats()
 
+let bigTreats = []
+function generateBigTreats() {
+    for (let i = 0; i < 2; i++) {
+        console.log('big treat time')
+        let bigTreat = new BigTreat({x: getRandomInt(0, canvasWidth), y: getRandomInt(0, canvasHeight)})
+        ensureEntityIsInEmptyGridSquare(bigTreat)
+        bigTreats.push(bigTreat)
+        console.log(bigTreats)
+    }
+}
+generateBigTreats()
+
 let star = new Star({x: getRandomInt(20, canvasWidth - 20), y: getRandomInt(20, canvasHeight - 20)}, 5, 20, 10)
 ensureEntityIsInEmptyGridSquare(star)
-
-
 
 
 function displayWinMessage() {
@@ -245,7 +386,7 @@ function displayLossMessage() {
     c.fillText('Game over :(', 385, 335)
     c.font = '35px calibri'
     c.fillStyle = 'orange'
-    c.fillText('Press Enter to play again', 340, 405)       
+    c.fillText('Oops! You stepped on one too many mines...', 230, 405)       
 }
 
 function getGridString(pxCoordinates) {
@@ -253,7 +394,6 @@ function getGridString(pxCoordinates) {
     let gridY = Math.floor(pxCoordinates.y / gridSize)
     return `${ gridX }, ${ gridY}`
 }
-
 
 function addCircleCoordinatesToGridMap(circle) {
     for (let x = circle.center.x - circle.radius; x < circle.center.x + circle.radius; x += gridSize) {
@@ -265,7 +405,6 @@ function addCircleCoordinatesToGridMap(circle) {
 }
 
 function ensureEntityIsInEmptyGridSquare(entity) {
-
     let entityType = null
     entityType = entity?.constructor.name
 
@@ -280,7 +419,6 @@ function ensureEntityIsInEmptyGridSquare(entity) {
     entity.center.x = Math.floor(entity.center.x / gridSize) * gridSize + (gridSize / 2)
     entity.center.y = Math.floor(entity.center.y / gridSize) * gridSize + (gridSize / 2)
 }
-
 
 
 
@@ -305,11 +443,11 @@ window.addEventListener('keydown', function(event) {
     }
     tick()
 
-    if (event.code == 'Enter') {
-        if (gameStateInst.win || gameStateInst.loss) {
-            resetGame(c)
-        }
-    }
+    // if (event.code == 'Enter') {
+    //     if (gameStateInst.win || gameStateInst.loss) {
+    //         resetGame(c)
+    //     }
+    // }
 })
 
 function tick() {
@@ -321,20 +459,24 @@ tick()
 
 function updateState() {   //to be called each time the circle moves 
     handleTreatsCollision(circle, treats)
+    handleBigTreatsCollision(circle, bigTreats)
     handleMinesCollision(circle, mines)
 }
 
 function redrawCanvas() {
     c.reset()
-    drawAxis()
+    // drawAxis()
     for (let mine of mines) {
         mine.draw(c)
     }
     for (let treat of treats) {
         treat.draw(c)
     }
+    for (let bigTreat of bigTreats) {
+        bigTreat.draw(c)
+    }
     circle.draw(c)
-    checkIfDrawStar(treats, star)
+    checkIfDrawStar(treats, bigTreats, star)
     if (treats.length === 0) {
         circle.checkOverlapWithShapeCenter(star)
     }
@@ -345,26 +487,32 @@ function redrawCanvas() {
 function resetGame(c) {
     treats = []
     mines = []
+    bigTreats = []
     circle = new Circle({x: canvasWidth / 2, y: canvasHeight / 2}, 50)
     grid = new Map()
     generateMines()
     generateTreats()
+    generateBigTreats()
     tick()
     gameStateInst = new GameState(false, false)
+    points = 0
+    document.getElementById('points').innerHTML = points
+    lives = 3
+    document.getElementById('lives').innerHTML = lives
 }
 
 
-function drawAxis() {
-    c.beginPath()
-    c.moveTo(canvasWidth/2, 0)
-    c.lineTo(canvasWidth/2, canvasHeight)
-    c.stroke()
+// function drawAxis() {
+//     c.beginPath()
+//     c.moveTo(canvasWidth/2, 0)
+//     c.lineTo(canvasWidth/2, canvasHeight)
+//     c.stroke()
 
-    c.beginPath()
-    c.moveTo(0, canvasHeight/2)
-    c.lineTo(canvasWidth, canvasHeight/2)
-    c.stroke()
-}
+//     c.beginPath()
+//     c.moveTo(0, canvasHeight/2)
+//     c.lineTo(canvasWidth, canvasHeight/2)
+//     c.stroke()
+// }
 
 // below is an adaptation of a utility function for drawing starts
 function drawStar(center, spikes, outerRadius, innerRadius, c) {
@@ -395,3 +543,5 @@ function drawStar(center, spikes, outerRadius, innerRadius, c) {
     c.fillStyle = '#FFD700'
     c.fill()
 }
+
+initialState()
