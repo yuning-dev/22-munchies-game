@@ -10,6 +10,13 @@ const circleGrowthAmount = 7.5
 const maxCircleSize = 150
 const circleShrinkageAmount = 15
 
+let treatsCounter = 0
+document.getElementById('points').innerHTML = treatsCounter
+let lives = 3
+document.getElementById('lives').innerHTML = lives
+
+
+
 // min is inclusive, max is exclusive
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min)) + min
@@ -46,6 +53,10 @@ class Circle {
         let legA = mine.center.x - this.center.x
         let legB = mine.center.y - this.center.y
         if (legA ** 2 + legB ** 2 <= (this.radius + mine.outerRadius) ** 2) {
+            lives--
+            document.getElementById('lives').innerHTML = lives
+            // points-=2
+            // document.getElementById('points').innerHTML = points
             return true
         }
         return false
@@ -162,6 +173,8 @@ function handleTreatsCollision(circle, treats) {
     for (let i = 0; i < treats.length; i++) {
         if (circle.checkOverlapWithShapeCenter(treats[i])) {
             treats.splice(i, 1)
+            treatsCounter++
+            document.getElementById('points').innerHTML = treatsCounter
             if (circle.radius + circleGrowthAmount <= maxCircleSize) {
                 circle.changeCircleSize(circleGrowthAmount)
             }
@@ -351,6 +364,10 @@ function resetGame(c) {
     generateTreats()
     tick()
     gameStateInst = new GameState(false, false)
+    points = 0
+    document.getElementById('points').innerHTML = points
+    lives = 3
+    document.getElementById('lives').innerHTML = lives
 }
 
 

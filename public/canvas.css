@@ -1,9 +1,51 @@
-h1 {
+* {
+    font-family:cursive;
+}
+
+.orangeText {
+    color: orange;
+}
+
+.brownText {
+    color: brown;
+}
+
+#title {
     margin-top: 50px;
-    margin-bottom: 50px;
+    margin-bottom: 35px;
     text-align: center;
     color: blueviolet;
-    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+#intro {
+    width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#countersWrapper {
+    margin-left: auto;
+    margin-right: auto;
+    width: 1000px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+#counterSubwrapper {
+    margin-right: 20px;
+    margin-bottom: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    text-align: right;
+}
+
+#points {
+    color: green;
+}
+
+#lives {
+    color: brown;
 }
 
 canvas {
