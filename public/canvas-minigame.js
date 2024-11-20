@@ -10,17 +10,29 @@ const circleGrowthAmount = 7.5
 const maxCircleSize = 150
 const circleShrinkageAmount = 15
 
-//Setting up counters
+const startBtn = document.getElementById('startBtn')
+startBtn.addEventListener('click', function() {
+    startTimer()
+    redrawCanvas()
+})
+
+// Setting up points and lives counters
 let treatsCounter = 0
 document.getElementById('points').innerHTML = treatsCounter
 let lives = 3
 document.getElementById('lives').innerHTML = lives
 
-//Setting up time counter
+
+// Setting up time counter
 const minutesEl = document.getElementById('minutes')
 const secondsEl = document.getElementById('seconds')
+minutesEl.innerHTML = '00'
+secondsEl.innerHTML = '00'
 let totalSeconds = 0
-setInterval(setTime, 1000)
+
+function startTimer() {
+    setInterval(setTime, 1000)
+}
 
 function setTime() {
     ++totalSeconds
@@ -37,8 +49,9 @@ function pad(val) {
 }
 
 
-// min is inclusive, max is exclusive
+// Below are utility functions
 function getRandomInt(min, max) {
+    // min is inclusive, max is exclusive
     return Math.floor(Math.random() * (max - min)) + min
 }
 
@@ -46,6 +59,7 @@ function degreesToRadians(degrees) {
     return degrees * Math.PI / 180
 }
 
+// These are the entities featured in the game: circle, treat, mine, star and game state
 class Circle {
     constructor(center, radius) {
         this.center = { ...center }
@@ -73,10 +87,6 @@ class Circle {
         let legA = mine.center.x - this.center.x
         let legB = mine.center.y - this.center.y
         if (legA ** 2 + legB ** 2 <= (this.radius + mine.outerRadius) ** 2) {
-            lives--
-            document.getElementById('lives').innerHTML = lives
-            // points-=2
-            // document.getElementById('points').innerHTML = points
             return true
         }
         return false
@@ -171,6 +181,13 @@ class GameState {
 
 let gameStateInst = new GameState(false, false)
 
+function initialState() {
+    c.reset()
+    c.font = '35px calibri'
+    c.fillStyle = 'lightblue'
+    c.fillText('Click the Start game button above to begin!', 205, 335)
+}
+
 function checkWinAndDisplayMessage() {
     if (treats.length === 0) {
         if (circle.checkOverlapWithShapeCenter(star)) {
@@ -211,6 +228,10 @@ function handleMinesCollision(circle, mines) {
     for (let i = 0; i < mines.length; i++) {
         if (circle.checkOverlapWithMine(mines[i])) {
             mines.splice(i, 1)
+            lives--
+            document.getElementById('lives').innerHTML = lives
+            // points-=2
+            // document.getElementById('points').innerHTML = points
             if (circle.radius - circleShrinkageAmount >= 10) { 
                 circle.changeCircleSize(-circleShrinkageAmount)
             }
@@ -432,3 +453,5 @@ function drawStar(center, spikes, outerRadius, innerRadius, c) {
     c.fillStyle = '#FFD700'
     c.fill()
 }
+
+initialState()
