@@ -30,6 +30,40 @@
             </div>
         </div>
     </div>
+    <div id="statsModal">
+        <div id="modalContent">
+            <span id="close">&times;</span>
+            <div id="statsContent">
+                <div id="message"></div>
+                <div id="timeLivesWrapper">
+                    <span id="completionTime"></span>
+                    <span id="completionLives"></span>
+                </div>
+                <div id="completionPoints">
+                    <div id="total"></div>
+                    <div id="pointsBreakdownWrapper">
+                        <div id="x3MultiplierWrapper">
+                            x3 Multiplier: for treats collected within 5 seconds
+                            <div id="x3MultiplierTreats"></div>
+                            <div id="x3MultiplierBigTreats"></div>
+                        </div>
+                        <div id="x2MultiplierWrapper">
+                            x2 Multiplier: for treats collected within 10 seconds
+                            <div id="x2MultiplierTreats"></div>
+                            <div id="x2MultiplierBigTreats"></div>
+                        </div>
+                        <div id="noMultiplierWrapper">
+                            No Multiplier: after 10 seconds
+                            <div id="noMultiplierTreats"></div>
+                            <div id="noMultiplierBigTreats"></div>
+                        </div>
+                        <div id="minesStatsWrapper"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <canvas id="mainCanvas" width="1000" height="750"></canvas>
 
     <script src="./canvas-minigame.js"></script>

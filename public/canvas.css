@@ -10,6 +10,84 @@
     color: brown;
 }
 
+/* Below are modal window related CSS */
+#statsModal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Enable scroll if needed */
+}
+
+#modalContent {
+    background-color: #fefefe;
+    margin: 15% auto; 
+    padding: 0 30px 20px 30px;
+    border: 1px solid #888;
+    width: 380px; 
+}
+
+#statsContent {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+#close:hover, #close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+#message {
+    margin-top: 20px;
+    text-align: center;
+    color: blueviolet;
+}
+
+#timeLivesWrapper {
+    display: flex;
+    justify-content: space-between;
+}
+
+#completionPoints {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#pointsBreakdownWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-left: 10px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.9em;
+}
+
+#x3MultiplierWrapper > div {
+    margin-left: 25px;
+}
+
+#x2MultiplierWrapper > div {
+    margin-left: 25px;
+}
+
+#noMultiplierWrapper > div {
+    margin-left: 25px;
+}
+
+/* Above are modal window related CSS */
 #title {
     margin-top: 40px;
     margin-bottom: 30px;
@@ -46,7 +124,6 @@
 
 #counterSubwrapper {
     margin-right: 10px;
-    margin-bottom: 5px;
     display: flex;
     flex-direction: column;
     gap: 5px;
