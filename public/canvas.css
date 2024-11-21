@@ -10,6 +10,87 @@
     color: brown;
 }
 
+/* Below are modal window related CSS */
+#statsModal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Enable scroll if needed */
+}
+
+#modalContent {
+    background-color: rgb(245, 245, 245);
+    margin: 25% auto; 
+    padding: 0 30px 20px 30px;
+    border: 1px solid grey;
+    border-radius: 5px;
+    width: 380px; 
+}
+
+#statsContent {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+#close:hover, #close:focus {
+  color: rgb(222, 20, 20);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+#message {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    text-align: center;
+    color: blueviolet;
+}
+
+#timeLivesWrapper {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+#completionPoints {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#pointsBreakdownWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-left: 10px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.9em;
+}
+
+#x3MultiplierWrapper > div {
+    margin-left: 25px;
+}
+
+#x2MultiplierWrapper > div {
+    margin-left: 25px;
+}
+
+#noMultiplierWrapper > div {
+    margin-left: 25px;
+}
+
+/* Above are modal window related CSS */
 #title {
     margin-top: 40px;
     margin-bottom: 30px;
@@ -18,13 +99,13 @@
 }
 
 #introWrapper {
-    border: 1.5px solid black;
+    border: 1px solid grey;
     border-radius: 5px;
     width: 1000px;
     margin: 0 auto 10px auto;
     padding-top: 10px;
     padding-left: 10px;
-    background: rgb(239, 239, 239);
+    background: rgb(245, 245, 245);
 }
 
 #intro {
@@ -46,7 +127,6 @@
 
 #counterSubwrapper {
     margin-right: 10px;
-    margin-bottom: 5px;
     display: flex;
     flex-direction: column;
     gap: 5px;
