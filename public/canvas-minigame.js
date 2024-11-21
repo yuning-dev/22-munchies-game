@@ -254,8 +254,7 @@ function checkWinAndDisplayMessage() {
             gameStateInst.win = true
         }
         if (gameStateInst.win) {
-            displayWinMessage()
-            displayWinStats()
+            displayStats('win')
             clearTimer()
         }
     }
@@ -264,7 +263,7 @@ function checkWinAndDisplayMessage() {
 function checkLossAndDisplayMessage() {
     if (mines.length <= 1) {
         gameStateInst.loss = true
-        displayLossMessage()
+        displayStats('loss')
         clearTimer()
     }
 }
@@ -340,10 +339,8 @@ function handleMinesCollision(circle, mines) {
             minesCounter++
             lives--
             document.getElementById('lives').innerHTML = lives
-            if (points - 2 >= 0) {
-                points -= 2
-                document.getElementById('points').innerHTML = points
-            }
+            points -= 2
+            document.getElementById('points').innerHTML = points
             if (circle.radius - circleShrinkageAmount >= 10) { 
                 circle.changeCircleSize(-circleShrinkageAmount)
             }
@@ -391,11 +388,9 @@ generateTreats()
 let bigTreats = []
 function generateBigTreats() {
     for (let i = 0; i < 2; i++) {
-        console.log('big treat time')
         let bigTreat = new BigTreat({x: getRandomInt(0, canvasWidth), y: getRandomInt(0, canvasHeight)})
         ensureEntityIsInEmptyGridSquare(bigTreat)
         bigTreats.push(bigTreat)
-        console.log(bigTreats)
     }
 }
 generateBigTreats()
@@ -403,23 +398,16 @@ generateBigTreats()
 let star = new Star({x: getRandomInt(20, canvasWidth - 20), y: getRandomInt(20, canvasHeight - 20)}, 5, 20, 10)
 ensureEntityIsInEmptyGridSquare(star)
 
-
-function displayWinMessage() {
-    c.reset()
-    c.font = '50px calibri'
-    c.fillStyle = '#20B2AA'
-    c.fillText('You won :D', 380, 335)
-    c.font = '30px calibri'
-    c.fillStyle = 'orange'
-    c.fillText('Press Enter to play again', 340, 405)
-}
-
-
-
-function displayWinStats() {
+function displayStats(winOrLoss) {
     c.reset()
     modal.style.display = 'block'
-    document.getElementById('message').innerHTML = 'You win!'
+    let message
+    if (winOrLoss === 'win') {
+        message = 'You win!'
+    } else {
+        message = 'Game over... better luck next time'
+    }
+    document.getElementById('message').innerHTML = message
     document.getElementById('completionTime').innerHTML = 'Time: ' + minutesEl.innerHTML + ':' + secondsEl.innerHTML
     document.getElementById('completionLives').innerHTML = 'Lives: ' + lives
     document.getElementById('total').innerHTML = 'Total: ' + points + ' points'
@@ -439,15 +427,6 @@ function displayWinStats() {
     mines.innerHTML = minesCounter + ' mines triggered: ' + minesCounter*-2 + ' points'
 }
 
-function displayLossMessage() {
-    c.reset()
-    c.font = '50px calibri'
-    c.fillStyle = '#E52B50'
-    c.fillText('Game over :(', 385, 335)
-    c.font = '35px calibri'
-    c.fillStyle = 'orange'
-    c.fillText('Oops! You stepped on one too many mines...', 230, 405)       
-}
 
 function getGridString(pxCoordinates) {
     let gridX = Math.floor(pxCoordinates.x / gridSize)
