@@ -90,6 +90,41 @@
     margin-left: 25px;
 }
 
+#progressionBtnWrapper {
+    display: flex;
+    justify-content: center;
+}
+
+#retryBtn, #nextLevelBtn {
+    padding: 3px 20px;
+    background: rgb(154, 235, 248);
+    border-radius: 3px;
+    display: none;
+}
+
+#retryBtn:hover, #nextLevelBtn:hover {
+    cursor: pointer;
+    background: rgb(107, 223, 240);
+}
+
+#retryBtnsWrapper {
+    display: flex;
+    gap: 50px;
+}
+
+#restartBtn {
+    padding: 3px 20px;
+    background: orange;
+    border-radius: 3px;
+    display: none;
+}
+
+#restartBtn:hover {
+    cursor: pointer;
+    background: rgb(255, 128, 0);
+}
+
+
 /* Above are modal window related CSS */
 #title {
     margin-top: 40px;
