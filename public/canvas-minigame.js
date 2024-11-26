@@ -1,8 +1,9 @@
 const canvas = document.getElementById('mainCanvas')
 const c = canvas.getContext('2d')
 
-const canvasWidth = 1000
-const canvasHeight = 750
+const canvasSizeFactor = 0.9
+const canvasWidth = 1000 
+const canvasHeight = 750 
 
 const gridSize = 25
 
@@ -39,7 +40,7 @@ const startBtn = document.getElementById('startBtn')
 startBtn.addEventListener('click', function() {
     clearTimer()
     startTimer()
-    resetGameForLevel()
+    resetGameFully()
     numAttempts++
     modal.style.display = 'none'
     redrawCanvas()
@@ -438,7 +439,7 @@ function displayStats(winOrLoss) {
     // document.getElementById('totalTime').innerHTML = 'Total time: ' + overallMinutes + ':' + overallSeconds
     document.getElementById('completionTime').innerHTML = 'Time: ' + minutesEl.innerHTML + ':' + secondsEl.innerHTML
     document.getElementById('completionLives').innerHTML = 'Lives: ' + lives
-    document.getElementById('total').innerHTML = 'Total: ' + totalPoints + ' points'
+    // document.getElementById('total').innerHTML = 'Total: ' + totalPoints + ' points'
     document.getElementById('thisLevelPoints').innerHTML = 'This level: ' + points + ' points'
     const x3MultTreats = document.getElementById('x3MultiplierTreats')
     x3MultTreats.innerHTML = x3MultiplierTreatsCounter + ' treats: ' + x3MultiplierTreatsCounter*3 + ' points'
@@ -669,9 +670,9 @@ const retryLevelBtn = document.getElementById('retryBtn')
 retryLevelBtn.addEventListener('click', function() {
     resetGameForLevel()
     redrawCanvas()
-    totalPoints = 0
     startTimer()
     modal.style.display = 'none'
+    totalPoints = 0
 })
 
 const restartBtn = document.getElementById('restartBtn')
