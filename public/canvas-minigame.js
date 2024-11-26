@@ -1,14 +1,16 @@
 const canvas = document.getElementById('mainCanvas')
 const c = canvas.getContext('2d')
 
-const canvasWidth = 1000
-const canvasHeight = 750
+const canvasSizeFactor = 0.9
+const canvasWidth = 1000 
+const canvasHeight = 750 
 
 const gridSize = 25
 
 const circleGrowthAmount = 7.5
 const maxCircleSize = 150
 const circleShrinkageAmount = 15
+const minCircleSize = 10
 
 let numAttempts = 0
 
@@ -17,6 +19,10 @@ const closeModalBtn = document.getElementById('close')
 closeModalBtn.onclick = function() {
     modal.style.display = 'none'
 }
+
+let startingNumTreats = 10
+let startingNumBigTreats = 2
+let startingNumMines = 4
 
 // For calculating points multiplier
 const firstCutoffTime = 5
@@ -32,19 +38,17 @@ let minesCounter = 0
 
 const startBtn = document.getElementById('startBtn')
 startBtn.addEventListener('click', function() {
-    if (numAttempts === 0) {
-        startTimer()
-        resetGame()
-        numAttempts++
-    } else {
-        clearTimer()
-        startTimer()
-        resetGame()
-        numAttempts++
-    }
+    clearTimer()
+    startTimer()
+    resetGameFully()
+    numAttempts++
+    modal.style.display = 'none'
+    redrawCanvas()
+    totalPoints = 0
 })
 
 // Setting up points and lives counters
+let totalPoints = 0
 let points = 0
 document.getElementById('points').innerHTML = points
 let lives = 3
@@ -52,6 +56,10 @@ document.getElementById('lives').innerHTML = lives
 
 
 // Setting up time counter
+// let overallMinutes = ''
+// let overallSeconds = ''
+let pauseMinutes = ''
+let pauseSeconds = ''
 const minutesEl = document.getElementById('minutes')
 const secondsEl = document.getElementById('seconds')
 minutesEl.innerHTML = '00'
@@ -84,6 +92,18 @@ function pad(val) {
     }
     return valString
 }
+
+// function getTotalTime() {
+//     overallSeconds = (Number(pauseSeconds) + Number(overallSeconds)) % 60
+//     overallMinutes = parseInt((Number(pauseSeconds) + Number(overallSeconds)) / 60) + Number(pauseMinutes) + Number(overallMinutes)
+//     if (overallMinutes < 10) {
+//         overallMinutes = '0' + overallMinutes
+//     }
+//     if (overallSeconds < 10) {
+//         overallSeconds = '0' + overallSeconds
+//     }
+//     return overallMinutes + ':' + overallSeconds
+// }
 
 
 // Below are utility functions
@@ -251,6 +271,7 @@ function initialState() {
 function checkWinAndDisplayMessage() {
     if (treats.length === 0 && bigTreats.length === 0) {
         if (circle.checkOverlapWithShapeCenter(star)) {
+            // getTotalTime()
             gameStateInst.win = true
         }
         if (gameStateInst.win) {
@@ -261,7 +282,8 @@ function checkWinAndDisplayMessage() {
 }
 
 function checkLossAndDisplayMessage() {
-    if (mines.length <= 1) {
+    if (lives === 0) {
+        // getTotalTime()
         gameStateInst.loss = true
         displayStats('loss')
         clearTimer()
@@ -299,16 +321,14 @@ function handleTreatsCollision(circle, treats) {
     for (let i = 0; i < treats.length; i++) {
         if (circle.checkOverlapWithShapeCenter(treats[i])) {
             treats.splice(i, 1)
-            points += pointsMultiplier(Treat) * 1
+            const treatInstancePoints = pointsMultiplier(Treat) * 1
+            points += treatInstancePoints
+            totalPoints += treatInstancePoints
             document.getElementById('points').innerHTML = points
             if (circle.radius + circleGrowthAmount <= maxCircleSize) {
                 circle.changeCircleSize(circleGrowthAmount)
             }
             redrawCanvas()
-            for (let treat of treats) {
-                treat.draw(c)
-            }
-            checkIfDrawStar(treats, bigTreats, star)
         }
     }
 }
@@ -317,16 +337,14 @@ function handleBigTreatsCollision(circle, bigTreats) {
     for (let i = 0; i < bigTreats.length; i++) {
         if (circle.checkOverlapWithShapeCenter(bigTreats[i])) {
             bigTreats.splice(i, 1)
-            points += pointsMultiplier(BigTreat) * 3
+            const bigTreatInstancePoints = pointsMultiplier(BigTreat) * 3
+            points += bigTreatInstancePoints
+            totalPoints += bigTreatInstancePoints
             document.getElementById('points').innerHTML = points
             if (circle.radius + circleGrowthAmount <= maxCircleSize) {
                 circle.changeCircleSize(circleGrowthAmount)
             }
             redrawCanvas()
-            for (let bigTreat of bigTreats) {
-                bigTreat.draw(c)
-            }
-            checkIfDrawStar(treats, bigTreats, star)
         }
     }
 
@@ -340,14 +358,12 @@ function handleMinesCollision(circle, mines) {
             lives--
             document.getElementById('lives').innerHTML = lives
             points -= 2
+            totalPoints -= 2
             document.getElementById('points').innerHTML = points
             if (circle.radius - circleShrinkageAmount >= 10) { 
                 circle.changeCircleSize(-circleShrinkageAmount)
             }
             redrawCanvas()
-            for (let mine of mines) {
-                mine.draw(c)
-            }
         }
     }
 }
@@ -366,7 +382,7 @@ let mines = []
 addCircleCoordinatesToGridMap(circle)
 
 function generateMines() {
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < startingNumMines; i++) {
         let mine = new Mine({x: getRandomInt(0, canvasWidth), y: getRandomInt(0, canvasHeight)}, 7.5, 12.5)
         ensureEntityIsInEmptyGridSquare(mine)
         mines.push(mine)
@@ -377,7 +393,7 @@ generateMines()
 
 let treats = []
 function generateTreats() {
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < startingNumTreats; i++) {
         let treat = new Treat({x: getRandomInt(0, canvasWidth), y: getRandomInt(0, canvasHeight)})
         ensureEntityIsInEmptyGridSquare(treat)
         treats.push(treat)
@@ -387,7 +403,7 @@ generateTreats()
 
 let bigTreats = []
 function generateBigTreats() {
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < startingNumBigTreats; i++) {
         let bigTreat = new BigTreat({x: getRandomInt(0, canvasWidth), y: getRandomInt(0, canvasHeight)})
         ensureEntityIsInEmptyGridSquare(bigTreat)
         bigTreats.push(bigTreat)
@@ -400,17 +416,31 @@ ensureEntityIsInEmptyGridSquare(star)
 
 function displayStats(winOrLoss) {
     c.reset()
+    // can't rely on this function to calculate totals as displayStats() seems to be called multiple times
     modal.style.display = 'block'
     let message
+    const nextLevelBtn = document.getElementById('nextLevelBtn')
+    const retryLevelBtn = document.getElementById('retryBtn')
+    const restartBtn = document.getElementById('restartBtn')
+    pauseMinutes = minutesEl.innerHTML
+    pauseSeconds = secondsEl.innerHTML
     if (winOrLoss === 'win') {
-        message = 'You win!'
+        message = 'Level completed!'
+        nextLevelBtn.style.display = 'block'
+        retryLevelBtn.style.display = 'none'
+        restartBtn.style.display = 'none'
     } else {
         message = 'Game over... better luck next time'
+        retryLevelBtn.style.display = 'block'
+        restartBtn.style.display = 'block'
+        nextLevelBtn.style.display = 'none'        
     }
     document.getElementById('message').innerHTML = message
+    // document.getElementById('totalTime').innerHTML = 'Total time: ' + overallMinutes + ':' + overallSeconds
     document.getElementById('completionTime').innerHTML = 'Time: ' + minutesEl.innerHTML + ':' + secondsEl.innerHTML
     document.getElementById('completionLives').innerHTML = 'Lives: ' + lives
-    document.getElementById('total').innerHTML = 'Total: ' + points + ' points'
+    // document.getElementById('total').innerHTML = 'Total: ' + totalPoints + ' points'
+    document.getElementById('thisLevelPoints').innerHTML = 'This level: ' + points + ' points'
     const x3MultTreats = document.getElementById('x3MultiplierTreats')
     x3MultTreats.innerHTML = x3MultiplierTreatsCounter + ' treats: ' + x3MultiplierTreatsCounter*3 + ' points'
     const x3MultBigTreats = document.getElementById('x3MultiplierBigTreats')
@@ -460,7 +490,6 @@ function ensureEntityIsInEmptyGridSquare(entity) {
 }
 
 
-
 window.addEventListener('keydown', function(event) {
     let stepDistance = gridSize
     if (event.code == 'KeyD' || event.code == 'ArrowRight') {
@@ -481,17 +510,13 @@ window.addEventListener('keydown', function(event) {
         }
     }
     tick()
-
-    // if (event.code == 'Enter') {
-    //     if (gameStateInst.win || gameStateInst.loss) {
-    //         resetGame(c)
-    //     }
-    // }
 })
+
 
 function tick() {
     updateState()
     redrawCanvas()
+    // checkWinOrLoss()
 }
 
 tick()
@@ -515,15 +540,24 @@ function redrawCanvas() {
         bigTreat.draw(c)
     }
     circle.draw(c)
-    checkIfDrawStar(treats, bigTreats, star)
-    if (treats.length === 0) {
-        circle.checkOverlapWithShapeCenter(star)
+    if (circle.radius > maxCircleSize) {
+        circle.radius = maxCircleSize
     }
+    if (circle.radius < minCircleSize) {
+        circle.radius = minCircleSize
+    }
+    checkIfDrawStar(treats, bigTreats, star)
     checkWinAndDisplayMessage()
     checkLossAndDisplayMessage()
 }
 
-function resetGame(c) {
+// function checkWinOrLoss() {
+//     checkWinAndDisplayMessage()
+//     checkLossAndDisplayMessage()
+// }
+
+function resetGameExceptCounters() {
+    modal.style.display = 'none'
     treats = []
     mines = []
     bigTreats = []
@@ -534,10 +568,11 @@ function resetGame(c) {
     generateBigTreats()
     tick()
     gameStateInst = new GameState(false, false)
-    resetCounters()
 }
 
-function resetCounters() {
+function resetCountersForLevel() {
+    // overallMinutes = ''
+    // overallSeconds = ''
     points = 0
     document.getElementById('points').innerHTML = points
     lives = 3
@@ -551,6 +586,37 @@ function resetCounters() {
     noMultiplierBigTreatsCounter = 0
     minesCounter = 0
 }
+
+function resetAllCounters() {
+    resetCountersForLevel()
+    totalPoints = 0
+    startingNumTreats = 10
+    startingNumBigTreats = 2
+    startingNumMines = 4
+}
+
+function resetGameForLevel() {
+    resetCountersForLevel()
+    resetGameExceptCounters()
+}
+
+function resetGameFully() {
+    resetAllCounters()
+    resetGameExceptCounters()
+}
+
+function createNextLevel() {
+    modal.style.display = 'none'
+    // minutesEl.innerHTML = pauseMinutes
+    // secondsEl.innerHTML = pauseSeconds
+    startTimer()
+    startingNumTreats += 2
+    startingNumBigTreats += 1
+    startingNumMines += 2
+    resetGameForLevel()
+    lives = 3
+}
+
 
 
 // function drawAxis() {
@@ -594,5 +660,27 @@ function drawStar(center, spikes, outerRadius, innerRadius, c) {
     c.fillStyle = '#FFD700'
     c.fill()
 }
+
+const nextLevelBtn = document.getElementById('nextLevelBtn')
+nextLevelBtn.addEventListener('click', function() {
+    createNextLevel()
+})
+
+const retryLevelBtn = document.getElementById('retryBtn')
+retryLevelBtn.addEventListener('click', function() {
+    resetGameForLevel()
+    redrawCanvas()
+    startTimer()
+    modal.style.display = 'none'
+    totalPoints = 0
+})
+
+const restartBtn = document.getElementById('restartBtn')
+restartBtn.addEventListener('click', function() {
+    resetGameFully()
+    redrawCanvas()
+    startTimer()
+    modal.style.display = 'none'
+})
 
 initialState()

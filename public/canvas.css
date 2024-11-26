@@ -90,10 +90,45 @@
     margin-left: 25px;
 }
 
+#progressionBtnWrapper {
+    display: flex;
+    justify-content: center;
+}
+
+#retryBtn, #nextLevelBtn {
+    padding: 3px 20px;
+    background: rgb(154, 235, 248);
+    border-radius: 3px;
+    display: none;
+}
+
+#retryBtn:hover, #nextLevelBtn:hover {
+    cursor: pointer;
+    background: rgb(107, 223, 240);
+}
+
+#retryBtnsWrapper {
+    display: flex;
+    gap: 50px;
+}
+
+#restartBtn {
+    padding: 3px 20px;
+    background: orange;
+    border-radius: 3px;
+    display: none;
+}
+
+#restartBtn:hover {
+    cursor: pointer;
+    background: rgb(255, 128, 0);
+}
+
+
 /* Above are modal window related CSS */
 #title {
-    margin-top: 40px;
-    margin-bottom: 30px;
+    margin-top: 15px;
+    margin-bottom: 15px;
     text-align: center;
     color: blueviolet;
 }
@@ -110,7 +145,7 @@
 
 #intro {
     width: 1000px;
-    margin: 0 auto 10px auto;
+    margin: 0 auto 5px auto;
 }
 
 #countersWrapper {
@@ -122,14 +157,13 @@
 }
 
 #timeCounterWrapper {
-    margin-top: 20px;
+    margin-top: 10px;
 }
 
 #counterSubwrapper {
-    margin-right: 10px;
+    margin-top: 10px;
     display: flex;
-    flex-direction: column;
-    gap: 5px;
+    gap: 10px;
     text-align: right;
 }
 
