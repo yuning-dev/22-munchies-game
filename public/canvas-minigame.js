@@ -617,8 +617,6 @@ function createNextLevel() {
     lives = 3
 }
 
-
-
 // function drawAxis() {
 //     c.beginPath()
 //     c.moveTo(canvasWidth/2, 0)
